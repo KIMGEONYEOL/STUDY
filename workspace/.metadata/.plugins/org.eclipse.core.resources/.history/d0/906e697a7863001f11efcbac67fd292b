@@ -1,0 +1,6 @@
+package collection.model.vo;
+
+import java.util.Comparator;
+
+public class BookPriceDescending implements java.util.Comparator{
+}

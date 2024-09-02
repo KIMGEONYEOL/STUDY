@@ -1,0 +1,28 @@
+package book.mvc.view;
+
+import java.util.Scanner;
+
+public class BookMenu {
+	Scanner sc = new Scanner(System.in);
+	
+	
+	
+	public void displayMenu() {
+		while(true){
+			
+			System.out.println("\n**** 도서 관리 프로그램 ****\n");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("1. 도서 추가 : ");
+			System.out.println("9. 끝내기");
+			
+		}
+		
+	}
+	
+	
+}

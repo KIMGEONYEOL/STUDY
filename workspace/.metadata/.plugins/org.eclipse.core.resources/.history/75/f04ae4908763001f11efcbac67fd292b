@@ -1,0 +1,12 @@
+package practice2;
+
+import java.util.ArrayList;
+
+public class TestBookManager {
+	// Field
+	private ArrayList bookList[];
+	
+	// Constructor
+	
+	// Method
+}

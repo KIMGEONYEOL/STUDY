@@ -1,0 +1,11 @@
+package book.mvc.view;
+
+public class BookMenu {
+	
+	public void displayMenu() {
+		
+		
+	}
+	
+	
+}

@@ -1,0 +1,16 @@
+package Test;
+
+public class TestDBConnect {
+
+	public TestDBConnect() {}
+	
+	public void oracleConnect() {
+		
+	}
+	
+	public static void main(String[] args) {
+		// 
+
+	}
+
+}

@@ -1,0 +1,46 @@
+package db.test;
+
+/* Java Sample */
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+public class openApi {
+    public static void main(String[] args) throws IOException {
+        String serviceKey = "fcdfe4b5-38d6-4592-8d63-7964b086465a";
+        String recordCount = "30";
+        String pageCount = "1";
+        
+        StringBuilder urlBuilder = new StringBuilder("http://api.kcisa.kr/openapi/API_CCA_145/request"); /*URL*/
+        urlBuilder.append("?serviceKey=").append(URLEncoder.encode(serviceKey, "UTF-8")); /*서비스키*/
+        urlBuilder.append("&recordCount=").append(URLEncoder.encode(recordCount, "UTF-8")); /*세션당 요청레코드수*/
+        urlBuilder.append("&pageCount=").append(URLEncoder.encode(pageCount, "UTF-8")); /*페이지수*/
+
+        URL url = new URL(urlBuilder.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Accept", "application/json"); // 응답으로 JSON을 받고자 할 때
+
+        System.out.println("Response code: " + conn.getResponseCode());
+
+        BufferedReader rd;
+        if (conn.getResponseCode() >= 200 && conn.getResponseCode() < 300) {
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        } else {
+            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            sb.append(line);
+        }
+        rd.close();
+        conn.disconnect();
+        System.out.println(sb.toString());
+    }
+}

@@ -1,0 +1,21 @@
+package employee.model.service;
+
+// Connection 관리와 트랜젝션 관리가 주 목적인 서비스 모델임
+public class EmployeeService {
+
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

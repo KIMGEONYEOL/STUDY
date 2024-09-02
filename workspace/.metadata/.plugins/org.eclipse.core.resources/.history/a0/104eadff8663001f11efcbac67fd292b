@@ -1,0 +1,10 @@
+package practice2;
+
+public class TestBookManager {
+	// Field
+	private ArrayList[] = bookList[];
+	
+	// Constructor
+	
+	// Method
+}

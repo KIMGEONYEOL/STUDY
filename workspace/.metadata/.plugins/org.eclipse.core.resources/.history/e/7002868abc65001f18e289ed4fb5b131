@@ -1,0 +1,8 @@
+package employee.exception;
+
+public class EmployeeException extends Exception {
+	public EmployeeException(String messeage) {
+		super(message);
+	}
+
+}

@@ -1,0 +1,9 @@
+package test.properties;
+
+public class PropertiesSample {
+	public void test1() {
+		// Properties 사용 : 
+		// 어플리케이션 
+	}
+	
+}

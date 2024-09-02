@@ -1,0 +1,13 @@
+package io.silsub1;
+
+public class MyNote {
+	// Field
+	private Scanner sc = new scan(System.in);
+	
+	
+	// Constructor
+	
+	
+	
+	// Method
+}

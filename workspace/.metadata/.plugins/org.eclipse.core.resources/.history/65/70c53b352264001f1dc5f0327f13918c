@@ -1,0 +1,17 @@
+package practice3;
+
+import java.util.Scanner;
+
+public class TestBookManagerMap {
+
+	public static void main(String[] args) {
+		// 
+		BookManagerMap bManager = new BookManagerMap();
+		Scanner sc = new Scanner(System.in);
+		int no;
+		
+		
+		
+	}
+
+}

@@ -1,0 +1,28 @@
+package Test;
+
+import java.sql.DriverManager;
+
+public class TestDBConnect {
+
+	public TestDBConnect() {}
+	
+	public void oracleConnect() {
+		try {
+			// 1. 오라클 jdbc 드라이브 등록
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// 2. db 연결
+			Connection conn = DriverManager.getConnection(null, null, null)
+			
+			
+		} catch (ClassNotFoundException e) {			
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		// oracle db 연결 테스트
+		new TestDBConnect().oracleConnect();
+
+	}
+
+}

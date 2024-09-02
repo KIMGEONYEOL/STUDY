@@ -1,0 +1,17 @@
+package practice3;
+
+import java.util.HashMap;
+
+public class BookManagerMap {
+	// Field
+	private HashMap booksMap; // 도서 번호를 key로 사용함.
+	
+	public BookManagerMap() {
+		booksMap = new HashMap();
+	}
+	
+	public BookManagerMap(Map map) {
+		booksMap = new HashMap(map);
+	}
+	
+}

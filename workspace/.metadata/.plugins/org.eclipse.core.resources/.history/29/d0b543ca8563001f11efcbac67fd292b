@@ -1,0 +1,12 @@
+package practice2;
+
+public class Book {
+	// Field
+	private String bNo;
+	private int category;
+	private String title;
+	private String author;
+	
+	
+	// Constructor
+}

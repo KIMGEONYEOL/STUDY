@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;testinheritance&apos;&#x0D;&#x0A;- Original project: &apos;testinheritance&apos;&#x0D;&#x0A;- Original element: &apos;testinheritance/src/com.practice2.controller.TestSilsub1.java&apos;" description="Delete element" element1="/src&lt;com.practice2.controller.TestSilsub1.java" element2="/src&lt;com.practice2.controller.TestSilsub1" element3="/src&lt;com.practice2.controller" element4="/src&lt;com.practice2" elements="4" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1724060706767" subPackages="false" version="1.0"/>
+</session>

@@ -1,0 +1,53 @@
+package practice2;
+
+import java.util.ArrayList;
+
+public class BookManager {
+	// Field
+	private ArrayList bookList[];
+	
+	
+	// Constructor
+	public void bookList() {
+		bookList = new ArrayList[];
+	}
+	public BookManager(ArrayList[] bookList) {
+		super();
+		this.bookList = bookList;
+	}
+		
+	
+	// Method
+	public void addBook(Book book) {
+		
+	}
+	
+	public void deleteBook(int index) {
+		
+	}
+	
+	public int searchBook(String bTitle) {
+		return bTitle;
+	}
+	
+	public void printBook(int index) {
+		
+	}
+	
+	public void displayAll() {}
+	
+	public Book sortedBookList() {
+		return;
+	}
+	
+	public void printBookList()
+	
+	
+	
+	
+}
+}
+	
+	
+	
+	

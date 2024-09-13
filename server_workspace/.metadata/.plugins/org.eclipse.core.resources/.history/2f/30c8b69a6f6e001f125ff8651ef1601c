@@ -1,0 +1,74 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>first</title>
+<style type="text/css">
+div.lineA{
+	height: 100px;
+	border: 1px solid gray;
+	float: left;
+	position: relative;
+	left: 120px;
+	margin: 5px;
+	padding: 5px;
+}
+div#banner {
+	width: 500px;
+	padding: 0;
+}
+div#banner img {
+	width: 450px;
+	height: 80px;
+	padding: 0;
+	margin-top: 10px;
+	margin-lefg: 25px;
+}
+</style>
+
+</head>
+<body>
+<h1>firstServleProject : first</h1>
+<hr>
+<header>
+	<div id="banner" class="lineA">
+		<img src="/first/resources/images/photo2.jpg">
+	</div>
+	<div id="loginBox" class="lineA">
+		first 사이트 방문을 환영합니다.<br>
+		<button onclick="movePage()">first 로그인</button>
+		<a href="/first/views/member/enrollPage.html">회원가입</a>
+	</div>
+</header>
+
+
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

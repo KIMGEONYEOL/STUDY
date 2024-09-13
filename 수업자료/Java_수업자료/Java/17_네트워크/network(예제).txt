@@ -1,0 +1,504 @@
+import java.net.*;
+
+public class InetAddress1 {
+	public static void main(String[] args) throws UnknownHostException, MalformedURLException {
+		InetAddress addr1 = InetAddress.getByName("www.daum.net");
+		InetAddress addr2 = InetAddress.getLocalHost();
+		URL url_info = new URL("http://weather.naver.com");
+		
+		System.out.println("addr1 : " + addr1.getHostAddress());
+		System.out.println("addr1 : " + addr1.getHostName());
+		
+		System.out.println("addr2 : " + addr2.getHostAddress());
+		System.out.println("addr3 : " + addr2.getHostName());
+		
+		System.out.println("프로토콜 : " + url_info.getProtocol());
+		System.out.println("포트번호 : " + url_info.getPort());
+	}
+}
+=========================================================================================================
+import java.net.*;
+import java.util.Scanner;
+
+public class InetAddress2 {
+	public static void main(String[] args) throws UnknownHostException {
+		Scanner sc = new Scanner(System.in);
+		String url=null;
+		
+		System.out.println("웹사이트주소:");  url=sc.next();
+		InetAddress []addr = InetAddress.getAllByName(url);
+		
+		System.out.println(url + "는 " + addr.length + "개의 IP주소를 가지고 있음");
+		for(int i=0; i<addr.length; i++)
+		{
+			System.out.println((i+1) + "번 IP = " + addr[i].getHostAddress());
+		}
+	}
+}
+=========================================================================================================
+import java.io.*;
+import java.net.*;
+
+public class UrlExample {
+	public static void main(String[] args)throws IOException {
+		String url=null;
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.print("URL페이지 입력 : ");
+		url=br.readLine().trim();    //양쪽공백없앰
+		
+		URL  url_info = new URL(url); 
+		System.out.println("프로토콜 : " + url_info.getProtocol());
+		System.out.println("포트번호 : " + url_info.getPort());
+		System.out.println("host : " + url_info.getHost());
+		System.out.println("URL내용 : " + url_info.getContent());
+		System.out.println("파일경로 : " + url_info.getFile());
+		System.out.println("URL전체 : " + url_info.toExternalForm());		
+	}
+}
+=========================================================================================================
+//TCP를 이용한 간단채팅 ==> server
+import java.net.*;
+import java.io.*;
+
+public class TCPServer {
+	public static void main(String[] args) {
+		int port=5000;   //서버포트
+		
+		try {
+			ServerSocket  ss = new ServerSocket(port); //소켓생성, 접속대기상태
+			while(true)
+			{
+				Socket client = ss.accept();     //client에서 연결요청수락(port확인)
+				InputStream is = client.getInputStream();
+				BufferedReader br = new BufferedReader(
+						 					   new InputStreamReader(is));
+				PrintStream ps = new PrintStream(System.out);
+				
+				ps.print(client.getInetAddress().getHostAddress());
+				ps.print("에서 수신메세지>>" + br.readLine() + "\n");
+				
+				//ps.close();
+				//br.close();
+				//client.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
+-------------------------------------------------------------------------------
+//TCP를 이용한 간단채팅 ==> client
+import java.net.*;
+import java.io.*;
+
+public class TCPClient {
+	public static void main(String[] args) {
+		int port=5000;
+		String server_ip, str;
+		
+		try{
+			PrintStream ps = new PrintStream(System.out);
+			BufferedReader br = new BufferedReader(
+					                       new  InputStreamReader(System.in));
+			ps.print("접속할 Server IP : ");
+			server_ip = br.readLine();
+			
+			while(true)
+			{
+				Socket client = new Socket(server_ip, port);
+				
+				OutputStream os = client.getOutputStream();
+				BufferedWriter bw = new BufferedWriter(
+										new OutputStreamWriter(os));
+				
+				ps.print("\n전송할 메세지 : ");
+				str = br.readLine();
+				
+				bw.write(str, 0, str.length());  //문자열, offset(위치), 길이
+				bw.flush();    //전송후 버퍼비우기
+				bw.close();
+				client.close();
+				
+				ps.print(server_ip + "에 메세지 전송성공!!");
+			}
+		}catch(Exception ex){System.out.println(ex.getMessage());}
+	}
+}
+=========================================================================================================
+//UDP를 이용한 간단채팅 ==> client
+import java.net.*;
+import java.io.*;
+public class UDPClient {
+	public static void main(String[] args) {
+		int port=7000;
+		String server_ip,  str;
+		BufferedReader br = new BufferedReader(
+				  					   new InputStreamReader(System.in));
+		PrintStream ps = new PrintStream(System.out);
+		
+		try{
+			ps.print("접속할 Server IP : ");
+			server_ip = br.readLine();
+			while(true)
+			{
+				ps.print("전송할 메세지 : ");
+				str = br.readLine();
+				
+				DatagramSocket ds = new DatagramSocket();
+				InetAddress addr = InetAddress.getByName(server_ip);
+				byte []buffer = str.getBytes();
+				
+				DatagramPacket dp = new DatagramPacket(buffer,
+						                                buffer.length, addr, port);
+				ds.send(dp);	
+				ps.flush();
+				//ps.print(server_ip + "에 메세지 전송성공!!");
+			}
+			
+		}catch(Exception ex){System.out.println(ex.getMessage());}
+	}
+}
+----------------------------------------------------------------------------------
+//UDP를 이용한 간단채팅 ==> server
+import java.net.*;
+import java.io.*;
+
+public class UDPServer {
+
+	public static void main(String[] args) {
+		int port=7000;
+		
+		final int BUFFER=50;
+		byte []buffer = new byte[BUFFER];
+		String message =null;
+		PrintStream ps = new PrintStream(System.out);
+		
+		try{
+			DatagramSocket ds = new DatagramSocket(port);  //UDP소켓생성
+			ps.print("접속대기중.....");
+			while(true)
+			{
+				DatagramPacket  dp = 
+					                    new DatagramPacket(buffer, buffer.length);
+				ds.receive(dp);  
+				message = new String(dp.getData());
+				ps.print("\n들어온메세지 : " + message);
+				ps.flush();
+			}
+		}catch(Exception ex){System.out.println(ex.getMessage());}
+		ps.close();
+	}
+}
+=========================================================================================================
+[다자간 채팅]
+
+1. 서버
+   -  ServerSocket생성
+   -  accept() 대기상태 : 요청이 들어오면 수락
+   -  txt_list에 들어온 ip를 출력
+   
+2. 클라이언트
+   - Socket생성해서  서버에 접속시도                                          ======> 테스트
+   - nickname전송
+   
+3.서버
+   - 객체를 추가할 Vector를 생성
+   - Vector에 인원수 추가
+   - 병행처리를 위해서 각각 객체마다 Thread생성
+     (ChatHandle - 사용자정의클래스)
+   - run()메소드에서 입장한 사용자 알림
+   - setMsg()만들기 -txt_list에  nickname or 대화내용을 출력     =======>   테스트  
+   - sendAll()함수를 만들어서 각각의 클라이언트들에게 방송(브로드캐스트)
+     
+4. 클라이언트
+   - 수신받아 txt_list에 추가 (' XX가 입장하였습니다' 출력)     =======>   테스트     
+   - 대화시작
+      (btn_send or  txt_input을 이용해서 서버에 전송 : 상대방과 대화)
+      
+5. 서버
+   - 대화내용을  txt_list출력                  =======> 테스트      
+   
+6. 서버   
+   - 동기화처리(부하방지)
+   - 퇴장을 알림                                     =======> 테스트
+   
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+//채팅 서버
+package swing.chat;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+
+public class GUIChatServer extends JFrame implements ActionListener{
+	TextArea txt_list;
+	JButton btn_exit;
+	
+	Vector    inwon;           //접속자수
+	public GUIChatServer()
+	{
+		super("Chatting Server");
+		
+		txt_list = new TextArea();
+		btn_exit = new JButton("서버종료");
+		
+		add(txt_list, "Center");
+		add(btn_exit,"South");
+		setSize(250,250);
+		setVisible(true);
+		//이벤트처리-----------------------
+		addWindowListener(
+				new WindowAdapter(){
+					public void windowClosing(WindowEvent e)
+					{
+						System.exit(0);
+					}
+				}
+			);
+		btn_exit.addActionListener(this);
+		//-----------------------------------------------------
+		inwon = new Vector();            //반드시 ServerStart()보다 먼저기술
+		ServerSocket();
+	}
+	//=====================서           버=========================
+	public void ServerSocket()
+	{
+		final int port=8000;
+		try{
+			ServerSocket ss = new ServerSocket(port);            //접속대기중
+			while(true)
+			{
+				Socket client = ss.accept();                          //요청수락
+				String str = client.getInetAddress().getHostAddress();   //ip주소 받기
+				txt_list.append(str);                                           //들어온객체추가 
+				
+				//병행처리를 하기위한 Client객체를 생성(사용자정의클래스)-------
+				ChatHandle ch = new ChatHandle(this,client);
+				inwon.addElement(ch);           //객체추가(인원수)
+				ch.start();
+			}
+		}catch(Exception e){}
+	}
+	public void setMsg(String msg)  //txt_list에  nickname or 대화내용을 출력
+	{
+		txt_list.append(msg+"\n");
+	}
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == btn_exit)
+			System.exit(0);
+	}	
+	public static void main(String[] args) {
+		new GUIChatServer();
+	}
+}
+//사용자정의 클래스----------------------------------------------
+class ChatHandle extends Thread
+{
+	GUIChatServer server;
+	Socket sock;
+	BufferedReader br;
+	PrintWriter pw;
+	
+	public ChatHandle(GUIChatServer  server, Socket sock)
+	{
+		this.server = server;
+		this.sock = sock;
+		try{
+			InputStream is = sock.getInputStream();
+			br = new BufferedReader(new InputStreamReader(is));       //입력스트림
+			
+			OutputStream os = sock.getOutputStream();
+			pw = new PrintWriter(new OutputStreamWriter(os));          //출력스트림
+		}catch(Exception e){}
+	}
+	//--------------------------------------------------------------
+	public void run()
+	{
+		String nickname=null;
+		try{
+			nickname = br.readLine();    
+			server.setMsg("[" + nickname +"]님이 입장하셨습니다");
+			sendAll("[" + nickname +"]님이 입장하셨습니다");
+			
+			while(true)  //대화중시작
+			{
+				String text = br.readLine();
+				server.setMsg(nickname + " : " + text);
+				sendAll(nickname + ">>" + text);
+			}
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}finally{
+			synchronized(server.inwon){           //동기화처리(부하방지)
+				
+				server.setMsg("[" + nickname +"]님이 퇴장하셨습니다");
+				sendAll("[" + nickname +"]님이 퇴장하셨습니다");
+			}
+		}
+	}
+	//모든접속자에게 메세지를 보냄-----------------------------------------
+	public void sendAll(String msg)
+	{
+		synchronized(server.inwon){
+			int s = server.inwon.size();        //인원수체크
+			for(int i=0; i<s; i++)
+			{
+				ChatHandle data = (ChatHandle)server.inwon.elementAt(i);
+				data.pw.println(msg);
+				data.pw.flush();
+			}
+		}
+	}
+}
+=========================================================================================================
+//채팅클라이언트
+package swing.chat;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.net.*;
+import java.io.*;
+
+public class GUIChatClient extends JFrame implements ActionListener,Runnable{
+	JPanel cardPane, connectPane, chatPane;
+	JLabel  msg;
+	JButton btn_connect, btn_send, btn_exit;
+	JTextField txt_server_ip, txt_name, txt_input;
+	TextArea txt_list;
+	CardLayout card;
+	
+	String ip_txt;                  //ip를 기억할변수
+	Socket client;                  //소켓변수
+	final int port=8000;
+	PrintWriter pw;                 //출력버퍼
+	BufferedReader br;            //입력버퍼
+		
+	
+	public GUIChatClient()
+	{
+		super("Chatting Client(ver 1.0)");
+		
+		ConnectPane();
+		ChatPane();
+		
+		//card-----------------------------
+		cardPane = new JPanel();
+		card = new CardLayout();
+		cardPane.setLayout(card);
+		cardPane.add(connectPane,"접속창");
+		cardPane.add(chatPane,"채팅창");
+		card.show(cardPane, "접속창");
+		//----------------------------------
+		add(cardPane);
+		setSize(400,300);
+		setVisible(true);
+		addWindowListener(
+			new WindowAdapter(){
+				public void windowClosing(WindowEvent e)
+				{
+					System.exit(0);
+				}
+			}
+		);
+		//이벤트처리-----------------------
+		btn_connect.addActionListener(this);
+		btn_exit.addActionListener(this);
+		btn_send.addActionListener(this);
+		txt_input.addActionListener(this);
+		//----------------------------------
+	}
+	public void ConnectPane()
+	{
+		connectPane = new JPanel();
+		JPanel pn=new JPanel();
+		JPanel pn1 = new JPanel();
+		JPanel pn2 = new JPanel();
+		
+		msg = new JLabel("IP와 대화명을 입력하시오");
+		msg.setFont(new Font("굴림체", Font.BOLD, 15));
+		msg.setForeground(Color.magenta);
+		
+		JLabel lb1 = new JLabel("서버 I P : ");
+		txt_server_ip = new JTextField("localhost", 15);
+		pn1.add(lb1);    pn1.add(txt_server_ip);
+		
+		JLabel lb2 = new JLabel("대 화 명 : ");
+		txt_name = new JTextField("캔디",15);		
+		pn2.add(lb2);    pn2.add(txt_name);
+		
+		pn.add(pn1);     pn.add(pn2);    pn.add(msg);
+		
+		btn_connect = new JButton("Connection");
+		
+		connectPane.setBorder(BorderFactory.createTitledBorder("다중채팅화면"));
+		connectPane.setLayout(new BorderLayout());
+		connectPane.add(pn,"Center");
+		connectPane.add(btn_connect,"South");
+	}
+	public void ChatPane()
+	{
+		chatPane = new JPanel();
+		JPanel  pn = new JPanel();
+		txt_list = new TextArea();
+		txt_input = new JTextField("",20);
+		btn_send = new JButton("전송");
+		btn_exit = new JButton("종료");
+
+		pn.setBorder(BorderFactory.createTitledBorder("☆대화하기☆"));
+		chatPane.setBorder(BorderFactory.createTitledBorder("♣채팅내용♣"));
+		pn.add(txt_input);   pn.add(btn_send);  pn.add(btn_exit);
+		
+		chatPane.setLayout(new BorderLayout());
+		chatPane.add(txt_list, "Center");
+		chatPane.add(pn, "South");
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		Object ob = e.getSource();
+		if(ob == btn_connect)
+		{
+			card.show(cardPane, "채팅창");
+			ip_txt = txt_server_ip.getText();
+			Thread th = new Thread(this);     //Runnable를 상속
+			th.start();
+		}
+		if(ob ==btn_exit)
+			System.exit(0);
+		
+		if(ob == btn_send || ob == txt_input)
+		{
+			String text = txt_input.getText();
+			pw.println(text);
+			pw.flush();
+			txt_input.setText("");
+			txt_input.requestFocus();
+		}
+	}
+	//=========Runnable 인터페이스의 run()메소드====================
+	public void run() {
+		try{
+			client = new Socket(ip_txt, port);    //접속시도
+			//전송------------------------------------------
+			String nickname = txt_name.getText();
+			OutputStream os = client.getOutputStream();
+			pw = new PrintWriter(new OutputStreamWriter(os));
+			pw.println(nickname);          //pw.print()   ----- X
+			pw.flush();                      //전송
+			//수신------------------------------------------
+			InputStream is = client.getInputStream();
+			br = new BufferedReader(new InputStreamReader(is));
+			String msg;
+			while(true)
+			{
+				msg = br.readLine();
+				txt_list.append(msg+"\n");
+			}
+		}catch(Exception e){}
+	}
+	public static void main(String[] args) {
+		new GUIChatClient();
+	}
+	
+}

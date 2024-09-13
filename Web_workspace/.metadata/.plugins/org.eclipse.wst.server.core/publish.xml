@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<publish-info>
+  <server id="testj server" path="publish1.dat"/>
+  <server id="testc server" path="publish0.dat"/>
+  <server id="html test server at localhost (2)" path="publish2.dat"/>
+</publish-info>

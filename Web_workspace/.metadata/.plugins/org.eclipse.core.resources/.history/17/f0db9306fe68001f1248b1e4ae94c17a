@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>testc</title>
+</head>
+<link href="/testc/resources/css/transfrom.css" rel="stylesheet" type="text/css">
+
+<body>
+<h1>CSS3 의 transform, transition 속성 연습</h1>
+<a>
+		<div class="myphoto1">
+				<img src="/testc/resources/images/ph1.jpg" width="100" height="70">
+		</div>
+</a>
+
+
+</body>
+</html>

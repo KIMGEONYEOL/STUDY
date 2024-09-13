@@ -1,0 +1,22 @@
+package board.model.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import board.model.dto.User;
+
+public class MemberDao {
+	
+	// 로그인 처리용
+	public User selectLogin(Connection conn, User user) {
+		User loginUser = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		String query = "select * from users where userid = ? and userpwd = ?";
+		
+		
+		return loginUser;
+	}
+}

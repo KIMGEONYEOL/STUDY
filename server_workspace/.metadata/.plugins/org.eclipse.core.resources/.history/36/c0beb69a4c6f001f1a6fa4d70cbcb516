@@ -1,0 +1,18 @@
+package member.model.dao;
+
+import org.apache.ibatis.session.SqlSession;
+
+import member.exception.MemberException;
+import member.model.dto.User;
+
+public class MemberDao {
+	
+	
+	// 로그인 처리용
+	public User selectLogin(SqlSession session, User user) throws MemberException {
+//		return session.selectOne("selectLogin", user);
+		User loginUser = null;
+		
+		return loginUser;
+	}
+}

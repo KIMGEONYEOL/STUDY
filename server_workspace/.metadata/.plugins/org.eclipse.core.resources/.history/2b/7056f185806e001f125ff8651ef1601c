@@ -1,0 +1,10 @@
+package member.model.service;
+
+import board.model.dto.User;
+
+public class MemberService {
+	
+	public User selectLogin(User user) {
+		
+	}
+}

@@ -1,0 +1,4 @@
+HTML 코드가 올바른지 검사한다. 
+http://validator.w3.org/ 사이트를 이용하면 손쉽게 검사할 수 있다
+DHTML에 대한 자세한 설명은 http://ko.wikipedia.org/wiki/DHTML을 참조한다. 
+DOM 트리에 대한 자세한 내용은 http://www.w3schools.com/htmldom/dom_nodetree.asp를 참조한다.

@@ -1,0 +1,41 @@
+/**
+ * main2.js
+ * 2024-09-03
+ */
+
+function showAlert(){
+	window.alert('메세지만 출력되는 알림창입니다.');
+}
+
+function showConfirm(){
+	var returnValue = window.confirm('찬성하면 확인, 반대하면 취소를 누르시오.');
+	document.getElementById('result').innerHTML = '리턴값 확인 : ' + returnValue;
+}
+
+function showPrompt(){
+	var inputValue = window.prompt('주소를 입력하세요.');
+	document.getElementById('result').innerHTML = '입력된 주소 : ' + inputValue;
+}
+
+function inputValue(){
+	var userName = document.getElementById('username').value;
+	alert('입력된 이름 : ' + userName);
+	
+}
+
+function calculator2(op){
+	var n1 = Number(document.getElementById);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

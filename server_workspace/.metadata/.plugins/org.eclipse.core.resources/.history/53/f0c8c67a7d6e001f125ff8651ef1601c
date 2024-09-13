@@ -1,0 +1,9 @@
+package board.model.dao;
+
+public class MemberDao {
+	
+	// 로그인 처리용
+	public User selectLogin() {
+		
+	}
+}

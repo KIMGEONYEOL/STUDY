@@ -1,0 +1,6 @@
+package common;
+
+public class JDBCTemplate {
+	//db.properties 파일을 읽어와서 값을 적용
+	
+}

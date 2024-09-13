@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>first</title>
+</head>
+<body>
+<h1 align="center">first 로그인</h1>
+<div id="loginForm">
+    <!--
+        action="서버측 input 값들을 전송받을 서블릿클래스의 url 매핑이름"
+        웹에서는 뷰가 연결할 컨트롤러 클래스명은 주로 매핑(가리다)해서 사용
+    -->
+    <form action="/first/login" method="post">
+        <label>아이디 : <input type="text" name="userid" id="userid" class="pos"></label><br>
+        <label>암  호 : <input type="password" name="userpwd" id="userpwd" class="pos"></label><br>
+        <input type="submit" value="로그인">
+    </form>
+</div>
+
+</body>
+</html>

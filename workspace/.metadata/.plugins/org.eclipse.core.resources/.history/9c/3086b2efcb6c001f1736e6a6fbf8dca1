@@ -1,0 +1,5 @@
+package dbdao;
+
+public class DbDao {
+
+}

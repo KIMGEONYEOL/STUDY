@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>first</title>
+</head>
+<body>
+<h1 align="center">first 로그인</h1>
+<div id="loginForm">
+    <!--
+        action="서버측 input 값들을 전송받을 서블릿클래스의 url 매핑이름"
+        웹에서는 뷰가 연결할 컨트롤러 클래스명은 주로 매핑(가리다)해서 사용
+        즉, url 상에 보여질 가짜이름을 사용함
+        
+        경로 지정시 주의사항 :
+        모든 서블릿 컨트롤러는 root 에서 실행되게 해야 함 => content directory (webapp 폴더) 가 root 임.
+        action 에는 절대경로, 상대경로 둘 다 사용 가능함
+        절대경로는 /context root 명에서 시작하도록 표시함
+    -->
+    <form action="/first/login" method="post">
+        <label>아이디 : <input type="text" name="userid" id="userid" class="pos"></label><br>
+        <label>암  호 : <input type="password" name="userpwd" id="userpwd" class="pos"></label><br>
+        <input type="submit" value="로그인">
+    </form>
+</div>
+
+</body>
+</html>

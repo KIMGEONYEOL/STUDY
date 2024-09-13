@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample 6</title>
+</head>
+<body>
+<h1>자바스크립트에서 배열 다루기</h1>
+<p>
+<script type="text/javascript">
+	var arr1 = new Array(5);
+	var arr2 = new Array('red', 'yellow', 'green');
+	var arr3 = new Array(); // index 가 없음, 자료구조 스택(stack) 방식의 공간을 할당함 : FILO 구조
+	// FILO (First Input Last Output), push(저장), pop(제거) 동작
+	
+	// arr1 이 참조하는 배열 공간에 값 기록
+	for(var i = 0; i < arr1.length; i++){
+		arr1[i] = (i + 1) * 100; // 100, 200, 300, 400, 500
+		arr3.push(arr1[i]);  // 100, 200, 300, 400, 500
+	}
+	
+	document.write('arr3.length : ' + arr3.length + '<br>');
+	
+	
+</script>
+</p>
+</body>
+</html>
+
+
+
+
+

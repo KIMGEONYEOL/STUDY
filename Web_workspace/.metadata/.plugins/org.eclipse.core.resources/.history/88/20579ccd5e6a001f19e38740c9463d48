@@ -1,0 +1,8 @@
+/**
+ * main2.js
+ * 2024-09-03
+ */
+
+function showAlert(){
+	window.alert('메세지만 출력되는 알림창입니다.');
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<header>
+			<h1>프로덕트 폼</h1>
+</header>
+<hr>
+<div id="product_div">
+		<fieldset>	
+		<legend>납품자 정보</legend>
+		<ol>
+		<li>
+				<label>납품자명: 
+				<input type="text" size="25" name="pname"
+				placeholder="name">
+				</label>
+		</li>
+		<li>
+				<label for="email">email:</label>
+				<input type="email" name="email" id="email"
+				placeholder="ans	ws@naver.com">
+		</li>
+		<li>
+				<label for="homepage">홈페이지:</label>
+				<input type="url" name="homepage" id="homepage" 
+				placeholder="http://">
+		</li>
+		</ol>
+		</fieldset>
+</div>
+<div>
+<fieldset>	
+		<legend>납품 정보</legend>
+		<ol>
+		<li>
+				<label>상품명: 
+				<input type="text" size="25" name="pname" list="goodlist">
+					<datalist id="goodlist">
+					<option value="dog1004">도그1004</option>
+					<option value="catchicken">고양이치킨</option>
+					<option value="milk">우유</option>
+					</datalist>
+				</label>
+		</li>
+		<li>
+				<label for="pamount">납품수량:</label>
+				<input type="number" name="amount" id="pamount"
+				min="10" max="100" step="10" placeholder="최소 10 이상">
+		</li>
+		<li>
+				<label for="pgrade" >납품등급:</label>
+				<input type="range" name="pgrade" id="pgrade" min="0" max="10" step="2">
+		</li>
+		<li>
+				<label for="etc">기타사항:</label>
+				<table>
+				<td><textarea name="etc" rows="3" cols="50"></textarea></td></tr>
+				</table>
+		</li>
+		</ol>
+		</fieldset>
+
+</div>
+<input type="submit" value="send message">
+</body>
+</html>

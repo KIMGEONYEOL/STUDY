@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>testTable</title>
+</head>
+<body>
+<header>
+			<h1>테이블 태그 이용 구역 나누기 연습</h1>
+</header>
+<hr>
+<table></table>
+</body>
+</html>

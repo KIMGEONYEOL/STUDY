@@ -1,0 +1,101 @@
+package db.model.service;
+
+import static common.JDBCTemplate.*;
+//JDBCTemplate 이 가진 모든 static 메서드를 import 해라.
+
+import java.sql.Connection;
+import java.util.ArrayList;
+
+import db.exception.EmployeeException;
+import db.model.dao.EmployeeDao;
+import db.model.dto.Employee;
+
+// Connection 관리와 트랜젝션 관리가 주 목적인 서비스 모델임
+public class dbService {
+	private dbDao edao;
+	
+	public EmployeeService() throws dbException{
+		dbdao = new dbDao();
+	}
+	
+		
+	public ArrayList<Db> selectAll() throws dbException{
+		Connection conn = getConnection();
+		ArrayList<Db> list = edao.selectAll(conn);
+		close(conn);
+		return list;
+	}
+	
+	public ArrayList<Db> selectJob(String jobId) throws dbException{
+		Connection conn = getConnection();
+		ArrayList<Db> list = edao.selectJob(conn, jobId);
+		close(conn);
+		return list;
+	}	
+	
+	public ArrayList<Db> selectDept(String deptId) throwsdbException{
+		Connection conn = getConnection();
+		ArrayList<Db> list = edao.selectDept(conn, deptId);
+		close(conn);
+		return list;
+	}	
+	
+	public Db selectOne(String empId) throws dbException{
+		Connection conn = getConnection();
+		Db emp = edao.selectOne(conn, empId);
+		close(conn);
+		return emp;
+	}	
+	
+	public int insertEmployee(Db emp) throws dbException {
+		Connection conn = getConnection();
+		int result = dbdao.insertEmployee(conn, emp);
+		if(result > 0 ) {
+			commit(conn);
+		}else {
+			rollback(conn);
+		}
+		close(conn);
+		return result;
+	}
+	
+	public int updateEmployee(Db emp) throws dbException {
+		Connection conn = getConnection();
+		int result = edao.updateEmployee(conn, emp);
+		if(result > 0 ) {
+			commit(conn);
+		}else {
+			rollback(conn);
+		}
+		close(conn);
+		return result;
+	}
+	
+	public int deleteEmployee(String empId) throws EmployeeException {
+		Connection conn = getConnection();
+		int result = dbdao.deleteDb(conn, empId);
+		if(result > 0 ) {
+			commit(conn);
+		}else {
+			rollback(conn);
+		}
+		close(conn);
+		return result;
+	}
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

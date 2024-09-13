@@ -1,0 +1,16 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%> <%-- Jsp element 태그 --%>
+<%	// 스크립트릿(Scriptlet) 태그 : 일반 자바 구문 작성, 조건문, 반복문 등 작성되면 됨
+	String message = (String)request.getAttribute("message");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>first : error</title>
+</head>
+<body>
+<h1>오류 발생 : <%= message %></h1>
+<a href>이전 페이지로 이동</a> &nbsp; <a href>시작 페이지로 이동</a>
+</body>
+</html>

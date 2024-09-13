@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample4</title>
+</head>
+<body>
+<h1>자바스크립트 document 객체가 제공하는 메소드 중 태그 객체 정보 얻는 메소드</h1>
+<ol>
+		<li>var 태그객체변수 = document.getElementById('아이디명'); </li>
+		<button onclick="getTagId();">아이디로 태그 정보 얻기</button>
+		<div id="box" style="background:orange; width: 200px; height:100px;">box 영역입니다...</div>
+		<script type="text/javascript">
+				function getTagId(){
+					var boxDiv = document.getElementById('box')
+					boxDiv.style.backgroundColor = 'olive';
+					alert('div 태그 안에 기록된 문자열 : ' + baxDiv.innerHTML
+							+ "\n배경색 : " + boxDiv.style.backgroundColor);
+					boxDiv.innerHTML = '자바스크립트에서 값 변경하였음...';
+				}
+		</script>
+		<hr>
+		
+		
+		<li>var 태그배열변수 = document.getElementsByName('name 속성에 지정한 이름');</li>
+		<p>
+			<input type='checkbox' name="icecream" value="브라보콘"> 브라보콘 &nbsp;
+			<input type='checkbox' name="icecream" value="구구콘"> 구구콘 &nbsp;
+			<input type='checkbox' name="icecream" value="월드콘"> 월드콘 &nbsp;
+			<input type='checkbox' name="icecream" value="요맘떼콘"> 요맘떼콘 &nbsp;
+		</p>
+		<button onclick="showValues();">이름으로 접근</button>
+		
+		<li></li>
+</ol>
+</body>
+</html>

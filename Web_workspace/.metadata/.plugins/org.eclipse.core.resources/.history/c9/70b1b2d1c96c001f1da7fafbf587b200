@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON 출력</title>
+  <!-- jQuery 라이브러리 추가 -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+  /* Javascript Sample */
+  var xhr = new XMLHttpRequest();
+  var url = 'http://api.kcisa.kr/openapi/API_CCA_145/request'; /* API URL */
+  
+  var queryParams = '?serviceKey=' + encodeURIComponent('fcdfe4b5-38d6-4592-8d63-7964b086465a'); /* 서비스 키 */
+  queryParams += '&numOfRows=' + encodeURIComponent('10'); /* 세션당 요청 레코드 수 */
+  queryParams += '&pageNo=' + encodeURIComponent('1'); /* 페이지 수 */
+  queryParams += '&format=json'; /* JSON 응답 형식 요청 */
+
+  xhr.open('GET', url + queryParams);
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      // 응답이 JSON이므로 JSON.parse로 파싱
+      var response = JSON.parse(this.responseText);
+      
+      console.log('status: ' + this.status);
+      console.log('resultCode: ' + response.response.header.resultCode);
+      console.log('resultMsg: ' + response.response.header.resultMsg);
+
+      var items = response.response.body.items;
+      $(items).each(function (index, item) {
+        console.log("TITLE: " + item.TITLE);
+        console.log("CNTC_INSTT_NM: " + item.CNTC_INSTT_NM);
+        console.log("COLLECTED_DATE: " + item.COLLECTED_DATE);
+        console.log("ISSUED_DATE: " + item.ISSUED_DATE);
+        console.log("DESCRIPTION: " + item.DESCRIPTION);
+        console.log("IMAGE_OBJECT: " + item.IMAGE_OBJECT);
+        console.log("LOCAL_ID: " + item.LOCAL_ID);
+        console.log("URL: " + item.URL);
+        console.log("VIEW_COUNT: " + item.VIEW_COUNT);
+        console.log("SUB_DESCRIPTION: " + item.SUB_DESCRIPTION);
+        console.log("SPATIAL_COVERAGE: " + item.SPATIAL_COVERAGE);
+        console.log("EVENT_SITE: " + item.EVENT_SITE);
+        console.log("GENRE: " + item.GENRE);
+        console.log("DURATION: " + item.DURATION);
+        console.log("NUMBER_PAGES: " + item.NUMBER_PAGES);
+        console.log("TABLE_OF_CONTENTS: " + item.TABLE_OF_CONTENTS);
+        console.log("AUTHOR: " + item.AUTHOR);
+        console.log("CONTACT_POINT: " + item.CONTACT_POINT);
+        console.log("ACTOR: " + item.ACTOR);
+        console.log("CONTRIBUTOR: " + item.CONTRIBUTOR);
+        console.log("AUDIENCE: " + item.AUDIENCE);
+        console.log("CHARGE: " + item.CHARGE);
+        console.log("PERIOD: " + item.PERIOD);
+        console.log("EVENT_PERIOD: " + item.EVENT_PERIOD);
+      });
+    }
+  };
+  xhr.send('');
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>first</title>
+<style type="text/css">
+div.lineA{
+		height: 100px;
+		border: 1px solid gray;
+		float: left;
+		position: relative;
+}
+</style>
+
+</head>
+<body>
+<h1>firstServleProject : first</h1>
+<hr>
+	<div id="banner" class="lineA">
+		<img src="/first/resources/imagaes/photo2.jpg">
+	</div>
+
+</body>
+</html>

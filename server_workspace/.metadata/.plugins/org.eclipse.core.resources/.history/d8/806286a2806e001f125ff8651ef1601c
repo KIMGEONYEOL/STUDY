@@ -1,0 +1,15 @@
+package member.model.service;
+
+import static common.JDBCTemplate.*;
+
+import board.model.dto.User;
+
+public class MemberService {
+	private MemberDao mdao = new MemberDao();
+	
+	
+	public User selectLogin(User user) {
+		Connection conn = getConnection();
+		User loginUser = 
+	}
+}

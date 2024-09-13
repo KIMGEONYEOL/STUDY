@@ -1,0 +1,9 @@
+package db.exception;
+
+public class DbException extends Exception {
+	public EmployeeException(String message) {
+		super(message);
+	}
+
+	
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample7</title>
+</head>
+<body>
+<h1>자바스크립트에서 함수 다루기</h1>
+<h2>첫번째 방법 : function 함수명([매개변수, ...]){ 실행시킬 구문 작성	 return [결과값];}</h2>
+	<button onclick="javascript:test1();">실행확인</button>
+	<p id="p1"></p>
+		<script type="text/javascript">
+				function test1(){
+					document.getElementById('p1').innerHTML = 'test1() 함수 실행됨... <br>';
+				}
+		</script>
+	<hr>
+	
+	
+<h2>두번째 방법 : 함수참조변수 | 객체명.on이벤트 = function([parameter, ...]){ 소스구문 };</h2>
+<h3>익명(anonymus, 이름 없는) 함수 : 주로 이벤트 핸들러(이벤트 발생시 실행되는 함수) 작성에 사용됨</h3>
+	<button onclick="test2();">실행확인</button>
+	<p id="p2"></p>
+		<script type="text/javascript">
+				test2 = function(){ // 함수 참조 변수가 함수명의 역할을 함.
+					document.getElementById('p2').innerHTML = 'test2가 참조하는 익명 함수 실행됨... <br>';
+				}
+				
+				window.onload = function(){
+					alert('이 페이지에 문서 읽어 들이기 완료됨')
+				};
+		</script>
+	<hr>
+<h2>세번째 방법 : 스스로 실행되는 함수, (function(){ 소스구문 작성 })();</h2>
+<p id="p3"></p>
+<script type="text/javascript">
+		(function(){
+			document.getElementById('p3').innerHTML = '자동으로 실행됨.<br>';
+		})();
+</script>
+<hr>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

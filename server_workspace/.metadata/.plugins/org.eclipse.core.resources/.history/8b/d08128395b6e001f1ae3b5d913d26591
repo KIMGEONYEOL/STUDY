@@ -1,0 +1,9 @@
+package common;
+
+public class JDBCTemplate {
+	//db.properties 파일을 읽어와서 값을 적용
+	//싱글톤 디자인 패턴 사용함 => 모든 메소드에 static 적용함 (static 메모리에 할당함)
+	//static (정적) 메모리 : 프로그램 실행시 딱 한번 자동 기록함, 프로그램 구동 내내 한개만 존재함
+	
+
+}

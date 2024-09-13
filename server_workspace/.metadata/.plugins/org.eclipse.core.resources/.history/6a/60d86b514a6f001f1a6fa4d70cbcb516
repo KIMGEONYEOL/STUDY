@@ -1,0 +1,28 @@
+package member.model.service;
+
+import static common.JDBCTemplate.close;
+import static common.JDBCTemplate.getConnection;
+
+import java.sql.Connection;
+
+import org.apache.ibatis.session.SqlSession;
+
+import member.exception.MemberException;
+import member.model.dao.MemberDao;
+import member.model.dto.User;
+
+public class MemberService {
+   private MemberDao mdao = new MemberDao();
+   // 마이바티스가 제공하는 Connection, Transaction, Execution 을 담당하는 클래스
+   private SqlSession session;
+   
+   
+   
+   public User selectLogin(User user) throws MemberException {
+      Connection conn = getConnection();
+      User loginUser = mdao.selectLogin(conn, user);
+      close(conn);
+      return loginUser;
+   }//selectLogin(User user) end
+
+}//MemberService end

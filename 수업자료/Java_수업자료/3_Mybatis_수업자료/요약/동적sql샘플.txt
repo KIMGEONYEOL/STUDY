@@ -1,0 +1,26 @@
+게시판 페이징 처리를 위한 오라클 SQL문
+
+mybatis-mapper.xml
+<sql id="pagingHeaderSql">
+SELECT   T.*
+  FROM   (SELECT   ROWNUM AS RNUM, A.*
+            FROM   (
+</sql>
+
+<sql id="pagingFooterSql">
+) A) T
+ WHERE   T.RNUM BETWEEN 
+( NVL(#{ROWCOUNT}, 10) * NVL(#{CURRENTPAGE}, 1) ) - ( NVL(#{ROWCOUNT},10)-1 )
+ AND (NVL(#{ROWCOUNT}, 10) * NVL (#{CURRENTPAGE}, 1))
+</sql>    
+
+
+<select id="adminOperating.omniStoreBeaconList" resultType="hashMap" parameterType="hashMap">
+<include refid="pagingHeaderSql"/>
+SELECT SEQ, UUID, MAJOR, MINOR, STORECODE, STORENAME, BEACONPLACE, DELYN, 
+	REGDATE, REGIP, REGUSER, UPDDATE, UPDIP, UPDUSER
+FROM OMNISTORE_BEACONINFO
+WHERE DELYN = 'N'
+ORDER BY SEQ DESC
+<include refid="pagingFooterSql"/>
+</select>

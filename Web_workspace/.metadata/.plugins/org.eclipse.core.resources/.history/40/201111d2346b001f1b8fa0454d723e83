@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample 6</title>
+</head>
+<body>
+<h1>자바스크립트에서 배열 다루기</h1>
+<p>
+<script type="text/javascript">
+	var arr1 = new Array(5);
+	var arr2 = new Array('red', 'yellow', 'green');
+	var arr3 = new Array(); // index 가 없음, 자료구조 스택(stack) 방식의 공간을 할당함 : FILO 구조
+	// FILO (First Input Last Output), push(저장), pop(제거) 동작
+	
+	// arr1 이 참조하는 배열 공간에 값 기록
+	for(var i = 0; i < arr1.length; i++){
+		arr1[i] = (i + 1) * 100; // 100, 200, 300, 400, 500
+		arr3.push(arr1[i]);  // 100, 200, 300, 400, 500
+	}
+	
+	document.write('arr3.length : ' + arr3.length + '<br>');
+	
+	// arr2가 참조하는 배열공간의 기록된 값 확인
+	for(var i = 0; i < arr2.length; i++){
+		document.write(arr2[i] + '<br>');
+	}
+	// arr3 가 참조하는 배열공간의 기록된 값 출력 확인
+	document.write('arr3가 참조하는 배열공간의 기록값 확인<br>');
+	// push(기록할 값) 로 기록한 경우에는 pop() 으로 값을 추출함
+	// 스택구조의 배열 공간의 값이 하나씩 줄어들게 됨
+	var count = arr3.length;
+	for(var c = 0; c < count; c++){
+		document.write(arr3.pop() + ', 갯수 : ' + arr3.length + '<br>'); // FILO == LIFO
+	}
+	
+</script>
+</p>
+<hr>
+
+
+<h2>자바스크립트에서 배열 초기화</h2>
+<ul>
+		<li>java</li>
+		<li>oracle</li>
+		<li>web front</li>
+		<li>web server</li>
+		<li>framework</li>
+</ul>
+<p>
+<script type="text/javascript">
+		var arr1 = new Array('apple', 'banana', 'orange', 'grape');
+		var arr2 = [100, 200, 300, 400, 500];
+		// 태그 목록을 배열로 받는 경우
+		var liTags = document.getElementsByTagName('li');
+		
+		document.write('arr1의 값들<br>');
+		//for(var i = 0; i < arr1.length; i++){
+		for(var i in arr1){
+			document.write(i + ' : ' + arr1[i] + '<br>');
+		}
+		
+		document.write('arr2의 값들<br>');
+		//for(var i = 0; i < arr2.length; i++){
+		for(var i in arr2){
+			document.write(i + ' : ' + arr2[i] + '<br>');
+		}
+		
+		document.write('liTags의 값들<br>');
+		//for(var i = 0; i < liTags.length; i++){
+		for(var i in liTags){
+			document.write(i + ' : ' + liTags[i].innerHTML + '<br>');
+		}
+</script>
+</p>
+
+<hr>
+
+<h2>내장된 Array 객체가 제공하는 메소드와 속성(멤버변수)</h2>
+<p>
+<script type="text/javascript">
+		var array = ['java', 'oracle', 'html5', 'css3', 'javascript', 'jquery', 'servlet', 'jsp', 'ajax'];
+		
+		document.write('array : ' + array.toString() + '<br>');
+		document.write('indexOf : ' + array.indexOf('css3') + '<br>');
+		document.write('reverse : ' + array.reverse() + '<br>');
+		document.write();
+		
+</script>
+</p>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

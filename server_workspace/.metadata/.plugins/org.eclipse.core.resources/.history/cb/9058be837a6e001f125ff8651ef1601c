@@ -1,0 +1,9 @@
+package board.model.dto;
+
+// dto(data transfer object : 데이터 이동용 객체) == do(domain object : 한개 행의 정보 저장용 객체)
+// vo(value object : 값 저장용 객체) == entity
+// db 테이블의 각 컬럼값을 저장할 목적의 클래스임
+
+public class User {
+
+}

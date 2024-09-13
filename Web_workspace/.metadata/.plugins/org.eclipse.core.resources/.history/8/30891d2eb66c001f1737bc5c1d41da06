@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>dbtest</title>
+</head>
+<body>
+<li>db 링크<a href="/dbtest/view/db.html"></a></li>
+</body>
+</html>

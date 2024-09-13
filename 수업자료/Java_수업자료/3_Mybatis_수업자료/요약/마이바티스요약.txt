@@ -1,0 +1,830 @@
+[마이바티스(MyBatis)] -------------------------------------------------------------
+	www.mybatis.org
+
+ - 마이바티스란 XML 구문과 애너테이션을 사용한 SQL 문이나
+  저장된 프로시저를 데이터베이스와 자바 등을 연결시켜 주는 역할을 하는
+  영속성 프레임워크이다.
+
+ - 영속성 프레임워크란, 정보에 대한 접근과 저장을 단순화하는 라이브러리를 
+	말함.
+
+ - JDBC 코드와 수동으로 설정하는 파라메타와 결과 매핑을 없애주고, 
+	데이터베이스에 원시 타입과 맵 인터페이스, 자바 POJO(play old java
+	 object : 캡슐화가 완료된 자바 클래스)를 설정하고
+	매핑하기 위해 XML과 애너테이션을 사용함.
+
+
+<아이바티스(iBatis)와 마이바티스(Mybatis)의 차이점>
+ - 아이바티스
+	* 스프링 2.x 부터 지원
+	* 네임스페이스 선택 사용
+	* 매핑 구문은 xml 사용
+	* 동적 SQL 요소로 16개의 XML 엘리먼트 제공
+	* 스프링 자체 모듈임
+	* SqlMapConfig / sqlMap 용어 사용
+
+ - 마이바티스
+	* 스프링 3.x 부터 지원
+	* 네임스페이스 필수 사용 (쿼리문에 사용함. 자바로 따지면 패키지, 그룹의 개념)
+	* 매핑 구문은 xml과 애너테이션 사용
+	* 동적 SQL 요소로 4개의 XML 엘리먼트 제공
+	* 스프링 별도 모듈임
+	* Configuration / mapper 용어 사용
+
+ - 마이바티스-스프링 연동 모듈
+	: 마이바티스와 스프링 3.x 에 통합 지원함.
+	마이바티스 객체를 쉽게 생성하고 주입할 수 있으며, 
+	스프링 트랜잭션을 통해 처리할 수 있음.
+	자바 1.5 이상이어야 사용 가능함.
+
+
+<마이바티스-스프링과 마이바티스, 스프링 프레임워크의 버전별 관계>
+ -----------------------------------------------------------------
+ 마이바티스-스프링	마이바티스		스프링프레임워크
+  1.0.0, 10.0.1	 3.0.1 ~ 3.0.5	 3.0.0, 그 이상
+  1.0.2		 3.0.6		 3.0.0, 그 이상
+  1.1.0, 그 이상	 3.1.0, 그 이상	 3.0.0, 그 이상
+ -----------------------------------------------------------------
+
+
+[마이바티스 설치] -------------------------------------------------------------------
+ - 다운 사이트 : 	http://blog.mybatis.org/ >> 메뉴 : product 클릭
+ - mybatis-3.*.*.jar : 마이바티스 라이브러리
+ - java application 프로젝트에 라이브러리 추가함 (WEB-INF/lib)
+
+ * 자바 프로젝트에서 데이터베이스 연결 처리 : jdbc, mybatis, ibatis, hibernate 등
+
+ * 자바 프로젝트에서 MVC 디자인 패턴 적용시 데이터베이스와의 흐름
+
+	컨트롤러 클래스 -> 뷰 클래스     <->  모델 클래스  <-> 데이터베이스 서버
+	ex>
+	Main.java    -> View.java	   <->  Dao.java, Vo.java
+		     Dao 객체 생성	db 연결, CRUD 메소드생성
+		     Dao.CRUD메소드호출   트렌젝션관리
+		     리턴값을 가지고 출력	관련 객체 및 db 닫기
+
+* dao 클래스 CRUD 처리용 메소드
+   퀴리문작성(별도의 파일에 작성해서 읽어서 사용 가능)
+   쿼리문 실행  <----> db 서버에 쿼리문을 데이터베이스로 가지고 가서 실행하고, 결과받음
+   실행결과 리턴	   
+
+
+ * 자바 에플리케이선과 마이바티스와의 실행 흐름
+	뷰 ->컨트롤러 -> 서비스로직 -> 마이바티스 -> 데이터베이스
+			[BIZ]	 [configuration, mapper XML]
+	=> Configuration XML : Database 연결에 대한
+		driver, url, username, password 설정
+		매퍼 파일의 등록 처리
+
+	=> MAPPER XML : 별도로 작성된 쿼리문 저장 파일
+
+ - 마이바티스 설정 파일(mybatis-config.xml)에서 
+	데이터베이스 서버에 관한  데이터소스(dataSource),
+  매퍼 위치, 트랜잭션, SqlSession, 매퍼 주입에 관하여 설정한다.
+	>> java.io.Reader 로 파일을 읽음
+	Reader reader = Resources.getResourceAsReader("경로/config파일명.xml");
+	>> IOException 처리
+	>> SqlSession 인터페이스로 데이터베이스 연결 요청함
+	SqlSession session = new SqlSessionFactoryBuilder().build(reader).openSession();
+
+
+[매퍼 XML]-----------------------------------------------------------------------
+ : 처리할 SQL 문을 매퍼 XML 파일로 작성하는 가장 중요한 부분임.
+
+ - 데이터베이스에서 다루는 SQL 구문을 마이바티스에서 제공하는 XML이나
+  애너테이션을 통한 매핑 기법으로 작성됨.
+
+ - SQL 문에서 데이터 검색의 SELECT 문은 <select></select> element, 
+  INSERT문, UPDATE문, DELETE문은 <insert></insert>, <update></update>, <delete></delete> 요소로
+  매핑 XML 구문을 만듦.
+ - 각 Element 안에 쿼리문을 작성함.
+
+
+ <매퍼 XML 파일에서 사용되는 elements(요소)>
+
+ * cache : 해당 네임스페이스를 위한 캐시 설정
+ * cache-ref : 다른 네임스페이스의 캐시 설정에 대한 참조
+ * resultMap : 데이터베이스 결과데이터를 객체에 로드하는 방법 정의
+ * sql : 다른 구문에서 재사용하기 위한 SQL 조각
+ * insert : 매핑된 INSERT 문
+ * update : 매핑된 UPDATE 문
+ * delete : 매핑된 DELETE 문
+ * select : 매핑된 SELECT 문
+
+
+ <insert, update, delete, select 요소에 사용되는 공통 속성>
+
+ * id : 네임스페이스의 유일한 구분자
+ * parameterType : 구문에 전달된 파라메터의 클래스 풀네임이나 별명
+ * fllushCache : 구문 호출시 캐시 지원 여부 설정, 디폴트는 false
+ * timeout : 데이터베이스의 요청 결과를 기다리는 최대시간을 설정함.
+ * statementType : Statement, Prepared, Callable 중 선택,
+		디폴트는 Prepared
+
+
+ <select> element ----------------------------
+ : 데이터를 검색하는 SELECT 문의 매퍼 구문을 작성함.
+
+ - 테이블 전체 조회시의 사용형식
+	<select id="구분자" resultType="반환타입">
+		SELECT 컬럼명1, ......... FROM 테이블명
+	</select>
+
+ - select 요소의 속성
+	* resultType : 반환되는 타입의 전체 클래스명이나 별명
+	* resultMap : 외부 resultMap 참조이름, 
+			마이바티스의 가장 강력한 기능
+	* useCache : 구문의 결과에 캐시 사용 여부 지정, 디폴트는 true
+	* fetchSize : 지정된 결과의 수만큼 결과를 반환하는 값
+	* resultSetType : FORWARD_ONLY, SCROLL_SENSITIVE,
+			SCROLL_INSENSITIVE 중 선택
+
+ - 사용예
+	<select id="llistDepartment" resultType="vo.DeptVO">
+		SELECT * FROM DEPARTMENT
+	</select>
+
+
+ <insert, update, delete> element ---------------------------
+
+ - insert : 테이블에 행을 추가하는 INSERT 문의 매퍼 구문을 작성함
+ - update : 테이블의 컬럼값을 수정하는 UPDATE 문의 매퍼 구문을 작성함
+ - delete : 테이블의 행을 삭제하는 DELETE 문의 매퍼 구문을 작성함
+
+ - insert, update, delete 요소의 속성
+	* useGeneratedKeys : insert의 데이터베이스에서 생성한 키를
+		받는 JDBC getGeneratedKeys 메서드 설정
+		디폴트는 false
+	* keyProperty : getGeneratedKeys 메서드나 
+		insert 문의 selectKey 하위 요소에 의해 반환된 키를
+		지정할 프로퍼티 지정
+	* keyColumn : insert 에서 생성키를 가진 테이블의 컬럼명 지정,
+		키 칼럼이 테이블의 첫번째 컬럼일 때 사용
+
+
+ <파라메터의 위치지정자(?) 표기>
+ : jsp나 dao 클래스에서 SQL 문 처리에 PreparedStatement 를 사용할 때
+  쿼리 문자열에 사용되는 "?"를 위치 지정자라고 함.
+
+ - 사용예
+	String query = "SELECT * FROM Course WHERE C_ID=?";
+	PreparedStatement psmt = con.prepareStatement(query);
+	psmt.setInt(1, course_id);
+
+ - 파라메터는 마이바티스에서 매우 중요한 요소임.
+ - SQL 구문에 파라메터 값을 적용할 때는 "#{}" 기호로 표기하며,
+  {} 안에 '값'이나 자바빈의 '프로퍼티명'을 기술함.
+
+ - 표기법 : #{'값' 또는 '프로퍼티명'}
+
+ - SELECT 구문 형식
+	<select id="구분자" parameterType="파라메터 자료형"
+		resultType="반환자료형">
+		SELECT 컬럼명1, ... FROM 테이블명
+		WHERE 컬럼명 = #{'값'}
+	</select>
+
+ - INSERT 구문 형식
+	<insert id="구분자" parameterType="파라메터타입">
+		INSERT INTO 테이블명 (컬럼명1, ...)
+		VALUES (#{'값1'}, ... )
+	</insert>
+
+ - UPDATE 구문 형식
+	<update id="구분자" parameterType="파라메터타입">
+		UPDATE 테이블명 
+		SET 컬럼명1 = #{'값1'}, ... 
+		WHERE 컬럼명 = #{'값'}
+	</update>
+
+ - DELETE 구문 형식
+	<delete id="구분자" parameterType="파라메터타입">
+		DELETE FROM 테이블명 
+		WHERE 컬럼명 = #{'값'}
+	</delete>
+
+
+ <INSERT 문에서 자동 생성키를 사용하는 기능> -----------------------
+ : insert 요소에는 키 생성과 같은 기능에 대한 속성과 하위 요소가 있음.
+
+ - 데이터베이스가 자동 생성키를 지원하는 경우
+	: useGeneratedKey="true"로 설정하고,
+	 자동 생성 키를 적용할 키 컬럼을 keyProperty에 지정함.
+	 INSERT 문에는 키 컬럼을 기술하지 않음.
+
+	<insert id="구분자" parameterType="파라메터타입"
+		useGeneratedKey="true" keyProperty="키컬럼">
+		INSERT INTO 테이블명 (컬럼명1, ...)
+		VALUES (#{'값1'}, ... )
+	</insert>
+
+
+ - 데이터베이스가 자동 생성키를 지원하지 않는 경우
+  	: <insert> 요소 내에 <selectKey> 요소로 키 생성에 필요한
+  	 SELECT 문을 기술함.
+
+	<selectKey> 속성
+	* keyProperty : selectKey 구문의 결과가 할당될 대상 프로퍼티
+	* resultType : 결과의 타입
+	* order : BEFORE는 먼저 키 값을 생성한 후 insert문 실행, 
+		 AFTER 는 insert문 실행후 <selectKey>가 실행됨
+	* statementType : Statement, Prepared, Callable 중 선택.
+		 디폴트는 Prepared
+
+	<insert id="구분자">
+	  <selectKey keyProperty="id" resultType="int"
+		order="BEFORE" statementType="PREPARED">
+		키 생성과 관련된 SELECT 문
+	  </selectKey>
+	  INSERT 문
+	</insert>
+
+ * <selectKey> example : 
+<!-- 기프티콘 생성 -->
+	 <insert id="insertGifticon" parameterType="hashmap">
+	  	<selectKey keyProperty="purchase_no" 
+		resultType="int" order="BEFORE">
+			select max(purchase_no) 
+			FROM tb_purchase 
+	  	</selectKey>
+	   
+    		<![CDATA[
+    		insert into tb_gifticon values(
+		seq_gifticon_no.nextval, #{purchase_no}, 
+		#{barcode_img_name, jdbcType=VARCHAR}, 'N')
+    		]]>   
+    	</insert>
+
+* example2 : 
+<!-- 잔고충전 -->
+  <update id="userIncreMoney" parameterType="map">
+  	<![CDATA[
+	update tb_user 
+	set cash = #{increMoney} + cash
+	where user_no = #{user_no}
+    	]]>
+
+	<selectKey keyProperty="cash" resultType="int" 
+		order="AFTER">
+		select cash 
+		FROM tb_user 
+		WHERE user_no = #{user_no}
+	</selectKey>
+  </update>
+
+* example3 : 
+<insert id="signupAccount" parameterType="account">
+	<![CDATA[
+	INSERT INTO ACCOUNT (ano, id, pwd, email, idtype, seller, outyn, nickname)
+	VALUES(seq_ano.nextval, #{id}, ENCRYPTION_AES.ENC_AES(#{pwd}), #{id}, '일반회원', 'N', 'N', #{nickname})	
+	]]>
+	<selectKey keyProperty="ano" resultType="Integer" order="AFTER">
+		select seq_ano.currval from dual
+	</selectKey>
+</insert>
+
+<sql element> -------------------------------------------------------
+* example : 
+<sql id="searchQuery">
+	<if test="searchInfo != null and searchInfo.sType != null and searchInfo.sType != ''">
+	<choose>
+	<when test='searchInfo.sType.equals("t")'>
+		AND title LIKE '%'||#{searchInfo.sKeyword}||'%'
+	</when>
+	<when test='searchInfo.sType.equals("c")'>
+		AND content LIKE '%'||#{searchInfo.sKeyword}||'%'
+	</when>
+	<when test='searchInfo.sType.equals("tc")'>
+		AND (title LIKE '%'||#{searchInfo.sKeyword}||'%'
+		OR content LIKE '%'||#{searchInfo.sKeyword}||'%')
+	</when>
+	<when test='searchInfo.sType.equals("w")'>
+		AND writer_nickname LIKE '%'||#{searchInfo.sKeyword}||'%'
+	</when>
+	<otherwise>
+		AND (title LIKE '%'||#{searchInfo.sKeyword}||'%'
+		OR content LIKE '%'||#{searchInfo.sKeyword}||'%'
+		OR writer_nickname LIKE '%'||#{searchInfo.sKeyword}||'%')
+	</otherwise>
+	</choose>
+	</if>
+</sql>
+
+* 사용 : 쿼리문이 포함될 위치에 <include> 앨리먼트 사용
+
+<select id="getQuestionTotalCount" resultType="int">
+	SELECT COUNT(*)
+	FROM question
+	WHERE is_deleted = 'N'
+	<include refid="searchQuery" />
+</select>
+ 
+* example2 : 
+<sql id='con1'>
+	<choose>
+	<when test='mtype.equals("s")'>
+		sender_no= #{no} AND s_deleted= 'N'
+	</when>
+	<otherwise>
+		receiver_no= #{no} AND r_deleted = 'N'
+	</otherwise>
+	</choose>
+</sql>
+
+<select id="getMsgCount" parameterType="map" resultType="int">
+	SELECT COUNT(*)
+	FROM message 
+	WHERE <include refid="con1" />
+</select>
+
+
+
+ <ResultMap> element ---------------------------------------------
+ : 마이바티스의 강력한 요소임.
+  모든 컬럼 값의 결과가 HashMap에서 키 형태로 자동 매핑됨.
+  그러나 HashMap 은 좋은 도메인 모델은 아니기 때문에 도메인 모델로
+  자바빈이나 POJO를 사용함.
+
+ - ResultMap 의 하위 요소
+	* id : 기본 키에 해당되는 컬럼을 column 속성으로 값을 지정함
+	* result : 기본 키가 아닌 컬럼에 column 속성으로 값을 지정함
+	* constructor : 생성자로 값을 지정함
+	* association : 1대 1 관계를 처리함
+	* collection : 1대 다 관계를 처리함
+	* discriminator : 조건을 지정하여 값을 설정함
+
+
+ - id나 result 요소는 한 개의 컬럼을 한 개의 프로퍼티나 필드에 매핑하는
+  가장 기본적인 형태의 결과 매핑임.
+ - id, result 등으로 테이블 컬럼명과 프로퍼티명이 다른 경우 매핑시킬 수 있음
+	=> id와 result의 하위 요소(element)를 사용하는 방법
+	=> SQL 구문의 컬럼명에 별명(Alias)를 사용하는 방법
+	   : 테이블 컬럼명과 자바빈의 프로퍼티명이 다를 때
+		SELECT 문의 컬럼명에 별명을 사용하여 일치시킴
+	
+
+ <동적 SQL> -------------------------------------------
+
+ - 마이바티스는 if, choose(when, otherwise), trim(where, set), foreach
+  요소들로 SQL 문을 조건에 따라 다르게 실행하는 기능으로 동적 SQL 문을
+  사용할 수 있음.
+
+ * if  -------------------------------------------------------------
+  동적 SQL 에서 가장 공통적으로 사용되는 것으로 where의 일부로 포함될 수 있다. 
+  예를 들면 :
+
+  <select id="findActiveBlogWithTitleLike" resultType="Blog">
+    SELECT * FROM BLOG WHERE state = ‘ACTIVE’ 
+    <if test="title != null">
+      AND title like #{title}
+    </if>
+  </select>
+  이 구문은 선택적으로 문자열 검색 기능을 위한 쿼리문이다. 
+  만약에 title 값이 없다면 모든 active 상태의 Blog 가 조회될 것이고, 
+  title 값이 있다면 그 값과 비슷한 데이터를 조회하라는 퀴리문이다.
+
+  title과 author를 사용하여 검색하고 싶다면 다른 조건을 추가한다.
+  예를 들면 : 
+  <select id="findActiveBlogLike" resultType="Blog">
+    SELECT * FROM BLOG WHERE state = ‘ACTIVE’ 
+    <if test="title != null">
+      AND title like #{title}
+    </if>
+    <if test="author != null and author.name != null">
+      AND author_name like #{author.name}
+    </if>
+  </select>
+
+* example : 
+<!-- 고객센터 전체조회 +검색 -->
+<select id="serviceList" parameterType="hashmap" resultType="list"
+		resultMap="resultServiceCenter">
+	<![CDATA[
+	select * from (SELECT rownum rnum,a.* 
+	FROM SERVICE_CENTER_VIEW a 
+	]]>
+	<if test="isKeyword == 1">
+	<![CDATA[ where title like #{keyword} ]]>
+	</if>
+	<![CDATA[
+	order by service_no desc) where rnum>= #{startRow} and rnum<=#{endRow}
+	]]>
+</select>
+
+  ---------------------------------------------------------------------
+
+ * choose, when, otherwise
+  우리는 종종 적용할 모든 조건이 아닌 한가지 경우만을 원할 때, 
+  자바에서의 switch 구문과 유사한 choose 엘리먼트를 사용할 수 있다.
+
+  위 예제를 choose 구문으로 변경하면, title만으로 검색하고 author가 있다면 그 값으로 검색한다.   둘다 제공하지 않는다면 featured 상태의 blog가 조회되게 한다.
+
+  <select id="findActiveBlogLike" resultType="Blog">
+    SELECT * FROM BLOG WHERE state = ‘ACTIVE’
+    <choose>
+      <when test="title != null">
+        AND title like #{title}
+      </when>
+      <when test="author != null and author.name != null">
+        AND author_name like #{author.name}
+      </when>
+      <otherwise>
+        AND featured = 1
+      </otherwise>
+    </choose>
+  </select>
+
+* example : 
+  <select id="cuListCount" resultType="_int">
+	<![CDATA[
+	select count(*) from
+ 	EVENT_VIEW where writer = 3
+	]]>
+	<choose>
+	  <when test="edno == 1">
+	  <!-- 진행중 이벤트 -->
+ 	  <![CDATA[
+	    and sysdate <= end_date
+  	  ]]>
+	  </when>
+	  <when test="edno == 2">
+	  <!-- 종료된 이벤트 -->
+ 	  <![CDATA[and sysdate > end_date]]>
+	  </when>
+	</choose>
+  </select>
+
+* example : choose and if
+<!-- 관심상품 목록 조회 -->
+  <select id="favoriteList" parameterType="hashmap" resultType="list" 
+	resultMap="resultFavorite">
+	select * from favorite_list_view
+	where user_no = #{user_no}
+	<choose>
+	<when test="category == 0">
+	   <if test="!keyword.equalsIgnoreCase('%%')">
+		and product_name like #{keyword}
+	   </if> 
+	</when>
+	<when test="category == 1">
+	   <if test="!keyword.equalsIgnoreCase('%%')">
+		and store_name like #{keyword}
+	   </if>
+	</when>
+	<when test="category == 2">
+	   <if test="!keyword.equalsIgnoreCase('%%')">
+		and brand_name like #{keyword}
+	   </if>
+	</when>
+	</choose>		
+  </select>
+
+* example3 :
+<select id="selectWithEmail" parameterType="account" 
+	resultMap="accountResult">
+  <choose>
+  <when test="email !=null">
+	select a.*, c.likecategory
+	from (	SELECT * FROM ACCOUNT 
+		WHERE email = #{email}) a 
+		join ( select b.ano as ano, max(b.cname) as likecategory
+		      from (select ano, max(value) as value 
+			   from vi_likeinfo
+			   group by ano) a 
+		      join vi_likeinfo b on (a.ano = b.ano and a.value = b.value)
+		      group by b.ano) c on (a.ano = c.ano)
+  </when>
+  <otherwise>
+	select a.*, c.likecategory
+	from (
+		SELECT * FROM ACCOUNT WHERE id = #{id}) a 
+		join (select b.ano as ano, max(b.cname) as likecategory
+		      from (select ano, max(value) as value from 
+		      vi_likeinfo
+		      group by ano) a 
+		join vi_likeinfo b on (a.ano = b.ano and a.value = b.value)
+		group by b.ano) c on (a.ano = c.ano)
+  </otherwise>
+  </choose>
+</select>
+
+  ------------------------------------------------------------------------
+
+ * trim, where, set
+  앞서 예제는 악명높게 다양한 엘리먼트가 사용된 동적 SQL 이다. “if” 예제를 사용해보자.
+
+  <select id="findActiveBlogLike" resultType="Blog">
+    SELECT * FROM BLOG WHERE 
+    <if test="state != null">
+      state = #{state}
+    </if> 
+    <if test="title != null">
+      AND title like #{title}
+    </if>
+    <if test="author != null and author.name != null">
+      AND author_name like #{author.name}
+    </if>
+  </select>
+
+  위 쿼리문의 경우 어떤 조건에도 해당되지 않는다면 다음과 같은 SQL 이 만들어질 것이다.
+  SELECT * FROM BLOG WHERE
+  미완성된 퀴리문이 되면서 에러가 발생할 것이다. 
+
+  두번째 조건에만 해당된다면 다음과 같은 SQL이 만들어질 것이다.
+  SELECT * FROM BLOG WHERE AND title like ‘someTitle’
+  이 퀴리문도 문장 작성 오류로 에러가 발생할 것이다. 
+
+  그러므로 에러가 발생하지 않게 하기 위해서 다음과 같이 수정할 수 있다.
+  <select id="findActiveBlogLike" resultType="Blog">
+    SELECT * FROM BLOG 
+    <where> 
+      <if test="state != null">
+           state = #{state}
+      </if> 
+      <if test="title != null">
+          AND title like #{title}
+      </if>
+      <if test="author != null and author.name != null">
+          AND author_name like #{author.name}
+      </if>
+    </where>
+  </select>
+
+* trim 적용
+<select id="findActiveBlogLike" resultType="Blog">
+    SELECT * FROM BLOG 
+    <where> 
+      <if test="state != null">
+           state = #{state}
+      </if> 
+      <if test="title != null">
+	<trim prefix="WHERE" prefixOverrides="AND">
+          AND title like #{title}
+	</trim>
+      </if>
+      <if test="author != null and author.name != null">
+	<trim prefix="WHERE" prefixOverrides="AND">
+          AND author_name like #{author.name}
+	</trim>
+      </if>
+    </where>
+  </select>
+
+* example : 
+<select id="loginMember" parameterType="Member" 
+		resultMap="resultMember">
+	<![CDATA[ 
+	select * from member 			
+	]]>
+	<trim prefix="WHERE" prefixOverrides="AND">
+		<if test="userId != null">
+		<![CDATA[userid= #{userId} ]]>
+		</if>			
+		<if test="userPwd != null">
+		<![CDATA[ and userpwd = #{userPwd} ]]>
+		</if>
+	</trim>
+</select>
+
+
+  where 엘리먼트는 단순히 “WHERE”만을 추가한다. 
+  그리고 쿼리문이 "AND”나 “OR”로 시작한다면 그 “AND”나 “OR”를 지워버린다.
+
+  만약에 where 엘리먼트가 기대한 것처럼 작동하지 않는다면 
+  trim 엘리먼트를 사용자 정의할 수도 있다. 
+  예를들어 다음은 where 엘리먼트에 대한 trim 기능과 동일하다.
+
+  <trim prefix="WHERE" prefixOverrides="AND |OR ">
+  ... 
+  </trim>
+
+  override 속성은 오버라이드하는 텍스트의 목록을 제한한다. 
+  결과는 override 속성에 명시된 것들을 지우고 with 속성에 명시된 것을 추가한다.
+
+  다음 예제는 동적인 update 구문에 적용한 경우이다. 
+  set 엘리먼트는 update 하고자 하는 칼럼을 동적으로 포함시키기 위해 사용될 수 있다. 
+  예를 들어:
+
+  <update id="updateAuthorIfNecessary">
+    update Author
+      <set>
+        <if test="username != null">username=#{username},</if>
+        <if test="password != null">password=#{password},</if>
+        <if test="email != null">email=#{email},</if>
+        <if test="bio != null">bio=#{bio}</if>
+      </set>
+    where id=#{id}
+  </update>
+
+  여기서 set 엘리먼트는 동적으로 SET 키워드를 붙히고 필요없는 콤마를 제거한다.
+
+  trim 엘리먼트로 처리한다면 아래와 같을 것이다.
+  <trim prefix="SET" suffixOverrides=",">
+    ...
+  </trim>
+  이 경우 접두사는 추가하고 접미사를 오버라이딩 한다.
+  ----------------------------------------------------------------------------------
+
+ * foreach
+  동적 SQL 에서 공통적으로 필요한 것은 collection 에 대해 반복처리를 하는 것이다. 
+  예를들면 :
+
+  <select id="selectPostIn" resultType="domain.blog.Post">
+    SELECT * FROM POST P WHERE ID in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+  </select>
+
+  foreach 엘리먼트는 collection 을 사용하여, 
+  엘리먼트 내부에 item, index 두 가지 변수를 선언한다. 
+  이 엘리먼트는 열고 닫는 문자열로 명시할 수 있고 반복값에 사이에 구분자도 지정할 수 있다.
+
+  파라미터는 컬렉션의 Map이나 배열객체, List, Set 모두 사용 가능하다.  index 는 몇번째인지를 나타내고 value 는 요소를 나타낸다. 
+  Map을 사용할때 index는 key가 되고 value는 객체가 된다.
+  -------------------------------------------------------------------------------
+
+  * bind
+  bind 엘리먼트는 OGNL표현을 사용해서 변수를 만든 뒤 쿼리문에 연결한다. 
+  예를들면
+
+  <select id="selectBlogsLike" resultType="Blog">
+    <bind name="pattern" value="'%' + _parameter.getTitle() + '%'" />
+    SELECT * FROM BLOG
+    WHERE title LIKE #{pattern}
+  </select>
+
+  -------------------------------------------------------------------------------------
+  * Multi-db vendor support
+  "_databaseId" 변수로 설정된 databaseIdProvider가 동적인 코드에도 사용가능하다면 
+  데이터베이스 제품별로 서로다른 구문을 사용할 수 있다. 
+  다음의 예제를 보라:
+
+  <insert id="insert">
+    <selectKey keyProperty="id" resultType="int" order="BEFORE">
+      <if test="_databaseId == 'oracle'">
+        select seq_users.nextval from dual
+      </if>
+      <if test="_databaseId == 'db2'">
+        select nextval for seq_users from sysibm.sysdummy1"
+      </if>
+    </selectKey>
+    insert into users values (#{id}, #{name})
+  </insert>
+  ------------------------------------------------------------------------------------------
+
+  *Pluggable Scripting Languages For Dynamic SQL
+  마이바티스 3.2부터는 플러그인 형태로 스크립트 언어를 사용할 수 있다.
+  그래서 언어별 드라이버를 장착하고 동적 SQL쿼리를 작성할때 그 언어를 사용할 수 있다.
+
+  두개의 내장된 언어가 있다.
+  - xml
+  - raw
+
+  xml 언어는 설정하지 않을 때 기본으로 사용하는 값이다. 
+  xml을 사용하면 이전에 다룬 모든 동적태그를 실행할 수 있다.
+
+  raw 언어는 기능이 조금 부족하다. 
+  raw설정을 사용하면 마이바티스는 파라미터를 치환해서 데이터베이스 드라이버에 구문을 전달한다.   raw 언어는 xml 언어보다 조금 더 빠르다.
+
+  다음처럼 lang 속성을 추가해서 구문에서 사용할 언어를 명시할 수 있다.
+
+  <select id="selectBlog" lang="raw">
+    SELECT * FROM BLOG
+  </select>
+
+  또는 매퍼를 사용하는 경우라면 @Lang 애노테이션을 사용한다.
+
+  public interface Mapper {
+    @Lang(RawLanguageDriver.class)
+    @Select("SELECT * FROM BLOG")
+    List<Blog> selectBlog();
+  }
+
+  다음의 인터페이스를 구현해서 자신만의 언어 드라이버를 구현할 수도 있다.
+
+  public interface LanguageDriver {
+    ParameterHandler createParameterHandler(MappedStatement mappedStatement, 
+		Object parameterObject, BoundSql boundSql);
+    SqlSource createSqlSource(Configuration configuration, XNode script, 
+		Class<?> parameterType);
+    SqlSource createSqlSource(Configuration configuration, String script, 
+		Class<?> parameterType);
+  }
+
+
+[매퍼(Mapper)] 실행 메소드 설명 -------------------------------------------------
+ - 매퍼(Mapper)는 매핑된 SQL 구문을 주입하기 위한 인터페이스이며, 
+  반드시 인터페이스로 선언해야 함.
+
+ - 매퍼 인터페이스를 상속받은 구현 클래스에서는 
+  반드시 SqlSessionDaoSupport 클래스를 상속받아야 한다.
+
+  import org.mybatis.spring.support.SqlSessionDaoSupport;
+
+ - SqlSessionDaoSupport 는 
+  기본적인 자바 인터페이스인 SqlSession 을 제공하는 추상 클래스이다.
+
+ - SqlSession 인터페이스는 
+  서비스 로직의 DAO 구현체(매퍼)에서 getSqlSession() 메서드로 SQL 문을
+  처리하는 마이바티스 메서드를 호출할 SqlSessionTemplate 을 얻을 수 있음.
+
+ - SqlSessionTemplate는 SQL 매퍼 구문을 실행하고 커밋이나 롤백의
+  트랜잭션을 관리한다.
+
+ - SqlSessionFactory는 SqlSession 인스턴스를 생성하는 다수의 메서드를
+  제공하며 SqlSessionFactoryBuilder를 통해 생성된다.
+
+  	=> 마이바티스-스프링 연동 모듈을 사용하면
+	  SqlSessionFactory를 소스 상에서 사용할 필요가 없다.
+	=> 스프링 설정 파일에서 빈으로 설정하면 
+	  빈이 SqlSession에 매퍼를 주입되고, 트랜잭션 설정에 따라
+	  자동으로 세션을 커밋, 롤백함.
+
+	*** mybatis API 참조
+	http://mybatis.github.io/mybatis-3/ko/java-api.html
+
+ - 매퍼 구문을 실행하는 메서드로는 
+  데이터 검색의 selectOne(), selectList(), selectMap() 메서드와 
+  트랜잭션이 발생되는 데이터 변경의 
+  insert(), update(), delete() 메서드가 있음.
+	=> 메서드명 자체가 그 역할을 설명하도록 명명되었음.
+
+ - select 요소를 실행하는 메소드 사용형식
+
+	* 오직 하나의 객체만을 반환되는 메서드
+	  >> 널 또는 한개 이상이 반환되면 예외가 발생함
+	<T> T selectOne(String statement, Object parameter)
+	<T> T selectOne(String statement)
+
+	* 복수개의 객체를 리스트에 담아서 반환하는 메서드
+	<E> List<E> selectList(String statement, Object parameter)
+	<E> List<E> selectList(String statement)
+
+	* 결과 목록을 맵으로 변환하기 위한 특별 메서드
+	<K,V> Map<K,V> selectMap(String statement, 
+				Object parameter,
+				String mapKey)
+	<K,V> Map<K,V> selectMap(String statement, 
+				String mapKey>)
+
+	* 반환되는 데이터의 범위를 제한하거나, 실행 결과를 조작하는 메서드
+	<E> List<E> selectList(String statement, Object parameter,
+				RowBounds rowBounds)
+
+	<K,V> Map<K,V> selectMap(String statement, 
+				Object parameter,
+				String mapKey,
+				RowBounds rowBounds)
+
+	void select(String statement, Object parameter,
+			ResultHandler handler)
+	void select(String statement, Object parameter,
+			RowBounds rowBounds,
+			ResultHandler handler)
+
+	=> RowBounds 파라메타는 특정 개수의 레코드를 건너뛰게 함.
+	  예>
+		int offset = 100;
+		int limit = 25;
+		RowBounds rowBounds = 
+			new RowBounds(offset, limit);
+
+	=> 가장 좋은 성능을 위해, 결과셋의 타입을 
+	  SCROLL_SENSITIVE 나 SCROLL_INSENSITIVE 를 사용함.
+
+	=> ResultHandler 파라미터는 레코드별로 다룰수 있도록 해준다.
+	  List 에 추가할수도 있고, Map, Set 을 만들수도 있으며, 
+	  각각의 결과를 그냥 던질수도 있다. 	  
+	  ResultHandler 로 많은 것을 할 수 있고 
+	  MyBatis 는 결과셋을 다루기 위해 내부적으로 사용한다.
+
+	  인터페이스는 매우 간단하다.
+
+	  package org.apache.ibatis.session;
+	  public interface ResultHandler {
+	    void handleResult(ResultContext context);
+	  }
+
+	=> ResultContext 파라미터는 결과 객체에 접근할 수 있도록 해준다
+
+
+ - insert, update, delete 요소를 실행하는 메서드 형식
+
+	* insert 문 실행하는 메서드 : 처리된 트랜잭션 수를 리턴함
+	int insert(String statement, Object parameter)
+	int insert(String statement)
+
+	* update 문 실행하는 메서드
+	int update(String statement, Object parameter)
+	int update(String statement)
+
+	* delete 문 실행하는 메서드
+	int delete(String statement, Object parameter)
+	int delete(String statement)
+
+
+
+
+
+

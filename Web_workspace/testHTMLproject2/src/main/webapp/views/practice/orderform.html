@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<header>
+			<h1>주문서 폼</h1>
+</header>
+<hr>
+<form>
+	<p><label>고객명: <input name="cname"></label></p>
+	<p><label>전화번호: <input type="tel" name="cphone"></label></p>
+	<p><label>email: <input type="email" name="cemail"></label></p>
+
+	<fieldset>
+		<legend>피자 사이즈</legend>
+	<p><label><input type=radio name="size" value="s"> Small </label></p>
+	<p><label><input type=radio name="size" value="m"> Medium </label></p>
+	<p><label><input type=radio name="size" value="l"> Large </label></p>
+	</fieldset>
+	<fieldset>
+		<legend>토핑 선택</legend>
+	<p><label><input type=checkbox name="topping" value="bacon"> 베이컨 </label></p>
+	<p><label><input type=checkbox name="topping" value="cheese"> 치즈 </label></p>
+	<p><label><input type=checkbox name="topping" value="onion"> 양파 </label></p>
+	<p><label><input type=checkbox name="topping" value="mushroom"> 버섯 </label></p>
+	</fieldset>
+</form>
+
+	<p><input type="submit" value="주문하기"></p>
+</body>
+</html>

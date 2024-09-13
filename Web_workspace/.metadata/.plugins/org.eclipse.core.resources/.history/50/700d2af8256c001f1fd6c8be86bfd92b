@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample10</title>
+<script type="text/javascript">
+	/* 	window.onload = function(){
+			document.body.onmousedown = function(){
+				alert('body 에서 마우스 버튼 눌렀음.');
+			};
+			
+			document.body.onmousemove = function(event){ // 매개변수를 꺼내서 써도 됨.
+				console.log(event.x + ', ' +event.y);
+			}; 
+		}; */
+		
+		function execute(){
+			// first 와 second 의 결과를 합쳐서 result 에 보여주기
+			var first = document.getElementById('first');
+			var second = document.getElementById('second');
+		
+		
+		// 정규표현식을 이용한 숫자검사와 유효성 체크
+		/*
+		정규표현식 작성방법
+		1. var 변수명 = /정규표현식/;
+		2. var 변수명 = new RegExp('정규표현식');
+		*/
+		
+		// 텍스트필드에 기록된 값이 숫자인지 확인
+		var re = /^[0-9]+$/; // 정규식과 일치하는지 검사하는 메소드 : 정규식객체.test(검사대상) 사용함
+		if(!re.test(first.value)){
+			// 숫자가 아닌 값이 있는 경우
+			alert('숫자만 입력하세요.');
+			first.value = ''; // first 에 기록된 값 지움
+			first.focus(); // first 에 입력 커서가 표시되게 함
+			return;
+		}
+		if(!re.test(second.value)){
+			// 숫자가 아닌 값이 있는 경우
+			alert('숫자만 입력하세요.');
+			second.value = ''; // second 에 기록된 값 지움
+			second.focus(); // second 에 입력 커서가 표시되게 함
+			return;
+		}
+		
+		var result = Number(first.value) + Number(second.value);
+		document.getElementById('result').innerHTML = result;
+		}
+		
+		function validate(){
+			var userid = document.getElementById('userid');
+			var userpwd = document.getElementById('userpwd');
+			var userpwd2 = document.getElementById('userpwd2');
+			var username = document.getElementById('username');
+			var email = document.getElementById('email');
+			
+			// 암호와 암호확인이 일치하는지 검사
+			if(userpwd.value !== userpwd2.value){
+				alter('암호와 암호확인이 일치하지 않습니다.');
+				userpwd2.value = '';
+				userpwd.select();
+			}
+		}
+		
+</script>
+</head>
+
+<body>
+<h1>입력값에 대한 유효성 검사(Validation) 와 정규표현식(Regular Expression) 적용 테스트</h1>
+<h3>전송값에 대한 유효성 검사란, 서버로 전송하기 전에 클라이언트 브라우저에서 이상이 없는 값인지 확인하고 나서
+서버로 보내는 과정을 말한다.</h3>
+<input type="button" value = "결과확인" onclick="execute();"> <br>
+<!-- <input type="text" id="first" onkeyup="alter('키보드의 키에서 손똄.');"> -->
+<input type="text" id="first"> + <input type="text" id="second"> = <span id="result"></span><br>
+<hr>
+
+<h2>회원가입 유효성 검사 테스트</h2>
+<form action="" method="post" onsubmit="return validate();">
+<!-- onsubmit="return 유효성검사함수();" 유효성검사함수가 true 를 리턴하면 return true; 가 되면 전송 실행됨
+유효성검사함수가 false 를 리턴하면 return false; 가 되면 전송 보내지 않음 -->
+<table width="650" border="1" cellspacing="0">
+	<tr>
+		<th width="150">아이디</th>
+		<!-- name 속성 : 서버로 보내기 위한 이름, id 속성 : 자바스크립트에서 태그에 접근하기 위한 이름 -->
+		<td><input type="text" name="userid" id="userid"> &nbsp; <input type="button" value="중복확인" ></td>
+	</tr>
+	<tr>
+		<th width="150">암호</th>
+		<td><input type="password" name="userpwd" id="userpwd"></td>
+	</tr>
+	<tr>
+		<th width="150">암호확인</th>
+		<td><input type="password" name="userpwd2" id="userpwd2"></td>
+	<tr>
+		<th width="150">이 름</th>
+		<td><input type="text" name="username" id="username"></td>
+	</tr>
+	<tr>
+		<th width="150">이메일</th>
+		<td><input type="email" name="email" id="email"></td>
+	</tr>
+	<tr>
+		<th width="150">전화번호</th>
+		<td><input type="tel" name="phone" id="phone"></td>
+	</tr>
+	<tr>
+		<th width="150">직 업</th>
+		<td>
+			<select id="job" name="job">
+					<option value="dab">데이터베이스 관리자(dab)</option>
+					<option value="developer">개발자</option>
+					<option value="da">데이터 분석가</option>
+					<option value="ai">ai 개발자</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<th width="150">성 별</th>
+		<td><input type="radio" name="gender" value="M"> 남 &nbsp;</td>
+		<td><input type="radio" name="gender" value="F"> 여 &nbsp;</td>
+	</tr>
+	<tr>
+		<th width="150">취 미</th>
+		<td>
+			<table width="450" >
+					<tr>
+						<td><input type="checkbox" name="hobby" value="게임"> 게임</td>
+						<td><input type="checkbox" name="hobby" value="음악"> 음악</td>
+						<td><input type="checkbox" name="hobby" value="독서"> 독서</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="hobby" value="등산"> 등산</td>
+						<td><input type="checkbox" name="hobby" value="요리"> 요리</td>
+						<td><input type="checkbox" name="hobby" value="운동"> 운동</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="hobby" value="공부"> 공부</td>
+						<td><input type="checkbox" name="hobby" value="제작"> 제작</td>
+						<td><input type="checkbox" name="hobby" value="기타"> 기타</td>
+					</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th colspan="2">
+			<input type="submit" value="가입하기"> &nbsp;
+			<input type="reset" value="작성취소">
+		</th>
+	</tr>
+	
+</table>
+</form>
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

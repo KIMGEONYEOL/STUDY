@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample 9</title>
+</head>
+<h1>자바스크립트에서 객체(json) 다루기</h1>
+<h2>function 객체명(){ 멤버 구성 }</h2>
+<button onclick="testObject();">실행확인</button>
+<p id="p1">함수명은 소문자로 시작, 객체명은 대문자로 시작함<br>
+</p>
+<script type="text/javascript">
+		function Book(){  // 객체 정의이면서, 생성자 정의가 됨
+			// 필드(field) == 속성(property) == 멤버변수
+			// this.속성명 = 초기값;
+			this.title = null;
+			this.author = null;
+			this.price = 0;
+			
+			// 멤버함수(method)
+			// this.메소드명 = function(){ 소스 작성 };
+			this.setBook = function(t, a, p){
+				this.title = t;
+				this.author = a;
+				this.price = p;
+			};
+			this.display = function(){
+				document.getElementById('p1').innerHTML += this.title + ", " + this.author + ", " + this.price + '<br>'
+			};
+		} // Book
+			
+		function testObject(){
+			var b = new Book();
+			b.setBook('자바스크립트 정석', '홍길도', 35000);
+			b.display();
+		}
+		
+		
+</script>
+
+<h2>버튼 누르면 p2 영역 안에 div 태그가 추가되게 함</h2>
+<button onclick="addDiv();">div 추가</button>
+<p id="p2"></p>
+<script type="text/javascript">
+		function MkDiv(){
+			this.element = null;
+			this.make = function(id, w, h, c){
+				this.element = document.createElement('div');
+				this.element.id = id;
+				this.element.style.width = w + 'px';
+				this.element.style.height = h + 'px';
+				this.element.style.backgroundColor = c;
+				
+				return this.element;
+			};
+		}//MkDiv
+		
+		function addDiv(){
+			document.getElementById('p2').appendChild(new MkDiv().make('d2', 30, 100, 'skyblue'));
+		}		
+</script>
+<hr>
+
+<h2>실습 : 폼 입력 양식에 값을 입력하고 추가 버튼을 누르면 입력값들을 아래의 테이블에 한줄씩 추가되게 함</h2>
+<form action="" method="post">
+		<label>이름 : <input type="text" name="username" id="username"></label> <br>
+		<label>나이 : <input type="number" name="age" id="age"></label> <br>
+		<label>성별 : <input type="radio" name="gender" value="남"> 남자 
+		<input type="radio" name="gender" value="여"> 여자</label> <br>
+		<label>전화번호 : <input type="tel" name="phone" id="phone"></label> <br>
+		<label>취미 : <input type="checkbox" name="hobby" value="movie"> 영화보기
+					  <input type="checkbox" name="hobby" value="music"> 음악듣기
+					  <input type="checkbox" name="hobby" value="sport"> 음악듣기
+				 	  <input type="checkbox" name="hobby" value="reading"> 독서하기
+				 	  <input type="checkbox" name="hobby" value="climb"> 등산하기
+		</label> <br>
+		<input type="button" value="추가하기" onclick="addUser();">
+</form>
+<p id="p3">
+		<table id="tbl" width="500" border="1" cellspacing="0">
+				<tr>
+					<th>이름</th>
+					<th>나이</th>
+					<th>성별</th>
+					<th>전화번호</th>
+					<th>취미</th>
+				</tr>
+				<!-- 입력값들로 새로운 행을 추가해나감 -->
+		</table>
+</p>
+<script type="text/javascript">
+		function User(){
+			this.name = null;
+			this.age = 0;
+			this.gender = null;
+			this.phone = null;
+			this.hobby = null;
+			
+			this.setUser = function(n, a, g, p, h){
+				this.name = n;
+				this.age = a;
+				this.gender = g;
+				this.phone = p;
+				this.hobby = h;
+			};
+			
+			// makeRow() 작성 : <tr> 에 대한 태그와 값들을 문자열로 만들어서 리턴 처리
+			this.makeRow = function(){}
+		}
+		
+		
+</script>
+
+
+<body>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<people>
+    <person>
+        <name>윤인성</name>
+        <gender>남자</gender>
+        <part>기타</part>
+    </person>
+    <person>
+        <name>연하진</name>
+        <gender>여자</gender>
+        <part>기타</part>
+    </person>
+</people>

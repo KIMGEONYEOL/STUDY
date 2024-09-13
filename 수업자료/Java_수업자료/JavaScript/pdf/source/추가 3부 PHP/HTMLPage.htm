@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Untitled Page</title>
+    <style>
+        body
+        {
+            font-family:맑은 고딕;
+        }
+    </style>
+    <script src="http://code.jquery.com/jquery-1.7.1.js"></script>
+    <script>
+        $(document).ready(function () {
+            // 텍스트
+            $.ajax('MyFirstStringAction.txt', {
+                success: function (data) {
+                    $('body').append(data);
+                }
+            });
+            // 요청 매개 변수를 포함하는 파일
+            $.ajax('ActionWithData.php', {
+                data: { name: 'RintIanTta', age: 21 },
+                success: function (data) {
+                    $('body').append(data);
+                }
+            });
+
+            // XML 파일
+            $.ajax('MyFirstXMLAction.xml', {
+                success: function (data) {
+                    $(data).find('person').each(function () {
+                        var name = '<li>' + $(this).find('name').text() + '</li>';
+                        var gender = '<li>' + $(this).find('gender').text() + '</li>';
+                        var part = '<li>' + $(this).find('part').text() + '</li>';
+
+                        $('body').append('<ul>' + name + gender + part + '</ul>');
+                    });
+                }
+            });
+
+            // JSON 파일
+            $.getJSON('MyFirstJSONAction.js', function (data) {
+                for (var i in data) {
+                    $('<h1></h1>').text(i + ':' + data[i]).appendTo('body');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+</body>
+</html>

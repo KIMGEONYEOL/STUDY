@@ -1,0 +1,49 @@
+package db.model.service;
+
+import static common.JDBCTemplate.*;
+//JDBCTemplate 이 가진 모든 static 메서드를 import 해라.
+
+import java.sql.Connection;
+import java.util.ArrayList;
+
+import db.exception.EmployeeException;
+import db.model.dao.EmployeeDao;
+import db.model.dto.Db;
+
+// Connection 관리와 트랜젝션 관리가 주 목적인 서비스 모델임
+public class dbService {
+	private dbDao edao;
+	
+	public DbService() throws dbException{
+		dbdao = new dbDao();
+	}
+		
+	public int insertEmployee(Db emp) throws dbException {
+		Connection conn = getConnection();
+		int result = dbdao.insertEmployee(conn, emp);
+		if(result > 0 ) {
+			commit(conn);
+		}else {
+			rollback(conn);
+		}
+		close(conn);
+		return result;
+	}
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

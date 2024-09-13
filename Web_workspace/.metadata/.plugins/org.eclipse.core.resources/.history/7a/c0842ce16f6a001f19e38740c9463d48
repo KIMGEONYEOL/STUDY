@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>sample4</title>
+</head>
+<body>
+<h1>자바스크립트 document 객체가 제공하는 메소드 중 태그 객체 정보 얻는 메소드</h1>
+<ol>
+		<li>var 태그객체변수 = document.getElementById('아이디명'); </li>
+		<button onclick="getTagId();">아이디로 태그 정보 얻디</button>
+		<li></li>
+		<li></li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,22 @@
+package member.model.service;
+
+import static common.JDBCTemplate.close;
+import static common.JDBCTemplate.getConnection;
+
+import java.sql.Connection;
+
+import board.exception.MemberException;
+import board.model.dao.MemberDao;
+import board.model.dto.User;
+
+public class MemberService {
+	private MemberDao mdao = new MemberDao();
+	
+	
+	public User selectLogin(User user) throws MemberException {
+		Connection conn = getConnection();
+		User loginUser = mdao.selectLogin(conn, user);
+		close(conn);
+		return loginUser;
+	}
+}

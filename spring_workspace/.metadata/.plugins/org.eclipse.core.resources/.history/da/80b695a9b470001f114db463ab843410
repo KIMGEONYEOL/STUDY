@@ -1,0 +1,19 @@
+package org.myweb.first.member.model.service;
+
+import org.myweb.first.member.model.dao.MemberDao;
+import org.myweb.first.member.model.dto.User;
+import org.springframework.stereotype.Service;
+
+public class MemberServiceImpl implements MemberService {
+   private MemberDao mdao = new MemberDao();
+   
+   // 스프링에서는 서비스 인터페이스를 상속받은 후손클래스를 작성하도록 정해놨음.
+   @Service("memberService")
+   public User selectLogin(User user){
+      session = getSession();
+      User loginUser = mdao.selectLogin(session, user);
+      session.close();
+      return loginUser;
+   }//selectLogin(User user) end
+
+}//MemberService end

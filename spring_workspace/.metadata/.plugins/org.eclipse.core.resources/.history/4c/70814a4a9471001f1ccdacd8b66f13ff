@@ -1,0 +1,72 @@
+package org.myweb.first.member.model.dto;
+
+import java.sql.Date;
+
+// dto (vo, entity, bean) 작성 규칙
+// 1. 반드시 직렬화할 것
+// 2. 모든 필드(멤버변수, property)는 반드시 private : 캡슐화할 것.
+// 3. 기본 생성자, 매개변수 있는 생성자 작성
+// 4. 모든 필드에 대한 getter and setter 작성할 것
+// 5. toString() 오버라이딩
+// 선택사항 : equals(), clone(), hashCode() 오버라이딩
+
+
+public class Member implements java.io.Serializable {
+	private static final long serialVersionUID = -4190375229839038309L;
+	
+	private String userId; // USERID	VARCHAR2(50 BYTE)
+	private String userPwd; // USERPWD	VARCHAR2(100 BYTE)
+	private String userName; //USERNAME	VARCHAR2(20 BYTE)
+	private String gender; // GENDER	CHAR(1 BYTE)
+	private int age; // AGE	NUMBER(3,0)
+	private String phone; // PHONE	VARCHAR2(13 BYTE)
+	private String email; // EMAIL	VARCHAR2(30 B YTE)
+	private java.sql.Date enrollDate; //ENROLL_DATE	DATE
+	private java.sql.Date lastModified; //LASTMODIFIED	DATE
+	private String signType; //SIGNTYPE	VARCHAR2(10 BYTE)
+	private String adminYN; // ADMIN_YN	CHAR(1 BYTE)
+	private String loginOk; //LOGIN_OK	CHAR(1 BYTE)
+	private String photoFileName; //PHOTO_FILENAME	VARCHAR2(100 BYTE)
+
+	// 기본 생성자
+	public Member() {
+		super();
+	}
+
+	
+	// 매개변수 있는 생성자
+	public Member(String userId, String userPwd, String userName, String gender, int age, String phone, String email) {
+		super();
+		this.userId = userId;
+		this.userPwd = userPwd;
+		this.userName = userName;
+		this.gender = gender;
+		this.age = age;
+		this.phone = phone;
+		this.email = email;
+	}
+
+
+	public Member(String userId, String userPwd, String userName, String gender, int age, String phone, String email,
+			Date enrollDate, Date lastModified, String signType, String adminYN, String loginOk, String photoFileName) {
+		super();
+		this.userId = userId;
+		this.userPwd = userPwd;
+		this.userName = userName;
+		this.gender = gender;
+		this.age = age;
+		this.phone = phone;
+		this.email = email;
+		this.enrollDate = enrollDate;
+		this.lastModified = lastModified;
+		this.signType = signType;
+		this.adminYN = adminYN;
+		this.loginOk = loginOk;
+		this.photoFileName = photoFileName;
+	}
+	
+	
+
+
+
+}

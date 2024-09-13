@@ -1,0 +1,9 @@
+package org.myweb.first.member.model.dto;
+
+// dto (vo, entity, bean) 작성 규칙
+// 1. 반드시 직렬화할 것
+// 2. 모든 필드(멤버변수, property)는 반드시 private : 캡슐화할 것.
+public class Member implements java.io.Serializable {
+	private static final long serialVersionUID = -4190375229839038309L;
+	
+}

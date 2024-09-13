@@ -1,0 +1,23 @@
+package org.myweb.first.member.model.service;
+
+import java.sql.Connection;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import member.exception.MemberException;
+import member.model.dao.MemberDao;
+import member.model.dto.User;
+
+public class MemberServiceImpl implements MemberService {
+   private MemberDao mdao = new MemberDao();
+     
+   public User selectLogin(User user) throws MemberException {
+      session = getSession();
+      User loginUser = mdao.selectLogin(session, user);
+      session.close();
+      return loginUser;
+   }//selectLogin(User user) end
+
+}//MemberService end

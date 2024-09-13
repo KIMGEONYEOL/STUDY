@@ -1,0 +1,7 @@
+package org.myweb.first.member.model.dto;
+
+// dto (vo, entity, bean) 작성 규칙
+// 1. 반드시 직렬화할 것
+public class Member implements java.io.Serializable {
+	
+}

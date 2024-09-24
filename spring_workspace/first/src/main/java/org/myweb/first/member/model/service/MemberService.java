@@ -1,5 +1,7 @@
 package org.myweb.first.member.model.service;
 
+import java.util.ArrayList;
+
 import org.myweb.first.member.model.dto.Member;
 import org.myweb.first.member.model.dto.User;
 
@@ -9,6 +11,11 @@ import org.myweb.first.member.model.dto.User;
 // public abstract 표기 생략 가능 => 상속받는 후손이 오버라이딩할 때 반드시 public 표기해야 함.
 public interface MemberService {
 	User selectLogin(User user);
-	int insertMember(Member member);
 	Member selectMember(String userid);
+	int insertMember(Member member);
+	int updateMember(Member member);
+	int deleteMember(String userId);
+	int selectCheckId(String userId);
+	ArrayList<Member> selectList();
+	
 }

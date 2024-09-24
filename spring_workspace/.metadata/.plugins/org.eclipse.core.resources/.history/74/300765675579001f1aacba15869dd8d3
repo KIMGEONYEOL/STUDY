@@ -1,0 +1,23 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%-- page 지시자는 jsp 파일에 한 번만 사용함. 단, import 속성만 분리 작성할 수 있음 --%>
+<%@ page import="org.ict.testjstl.member.model.dto.User" %>
+<%
+	User user = (User)request.getAttribute("resultUser"); // request.getAttribute("저장한 이름") : Object 리턴
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>testEL</title>
+</head>
+<body>
+<h1>EL(Expression Language : 표현 언어) 사용 테스트 페이지</h1>
+<%-- 자바 변수 또는 객체의 필드(속성 : property) 값 출력 처리 --%>
+아이디 : <%= user.getUserId() %> <br>
+암호 : <%= user.getUserPwd() %> <br>
+이름 : <%= user.getUserName() %>
+
+
+</body>
+</html>

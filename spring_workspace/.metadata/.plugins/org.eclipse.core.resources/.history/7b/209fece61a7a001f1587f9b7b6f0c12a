@@ -1,0 +1,13 @@
+package org.myweb.first.test.model.dao;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository("testDao")
+public class TestDao {
+	@Autowired
+	private sqlSessionTemplate sqlSessionTemplate;
+	
+	
+	
+}

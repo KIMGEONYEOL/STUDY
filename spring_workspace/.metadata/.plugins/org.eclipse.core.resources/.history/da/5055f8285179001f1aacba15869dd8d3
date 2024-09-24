@@ -1,0 +1,30 @@
+package org.ict.testjstl.test.controller;
+
+import org.ict.testjstl.member.model.dto.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class TestController {
+	
+	// 요청시 해당 뷰 페이지로 이동 처리용 메소드
+	@RequestMapping("testel.do")
+	public String moveELPage() {
+		// jsp 에서 el 사용을 위한 샘플 데이터 준비함
+		// 원래는 model 쪽으로 요청 전달해서 데이터베이스에서 조회한 리턴 결과를 가진 객체임 => 이 단계는 생략
+		User user = new User();
+		return "test/testEL";
+	}
+	@RequestMapping("testcore.do")
+	public String moveCorePage() {
+		return "test/testCore";
+	}
+	@RequestMapping("testfmt.do")
+	public String moveFmtPage() {
+		return "test/testFmt";
+	}
+	@RequestMapping("testfn.do")
+	public String moveFnPage() {
+		return "test/testFuncnions";
+	}
+}

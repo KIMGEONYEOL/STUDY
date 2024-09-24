@@ -1,6 +1,11 @@
 package org.myweb.first.member.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.myweb.first.member.model.dto.Member;
@@ -9,12 +14,15 @@ import org.myweb.first.member.model.service.MemberService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller // 설정 xml 에 해당 클래스를 Controller 로 자동 등록해줌
 public class MemberController {
@@ -26,6 +34,8 @@ public class MemberController {
 	@Autowired
 	private MemberService memberService;
 	
+	@Autowired
+	private BCryptPasswordEncoder bcryptPasswordEncoder;
 
 	// 뷰 페이지 내보내기용 메소드 ------------------------------
 
@@ -65,10 +75,20 @@ public class MemberController {
 	public String loginMethod(User user, HttpSession session, SessionStatus status, Model model) {
 		logger.info("login : " + user); // 전송온 값 확인
 		
-		User loginUser = memberService.selectLogin(user);
-		logger.info("loginUser : " + loginUser);
 		
-		if(loginUser != null) { // 로그인 성공시
+//		// 서비스 메소드를 받은 로그인 객체 정보 보내고 결과받기
+//		User loginUser = memberService.selectLogin(user);
+//		logger.info("loginUser : " + loginUser);
+		
+		// 암호화 처리된 패스워드가 일치하는지 조회는 select 해 온 값으로 비교함.
+		// 로그인 요청은 회원의 아이디로 먼저 회원 정보를 조회해 옴 >> 조회해 온 정보에서 암호 일치 확인함.
+		Member loginUser = memberService.selectMember(user.getUserId());
+		
+		// 조회해온 회원 정보가 있고, 암호화된 패스워드와 로그인 요청시 전달받은 패스워드가 일치하는지 비교함
+		// matches(전달받은 암호글자, 암호화된 패스워드) == true 이면 로그인 성공 처리함
+		if(loginUser != null 
+				&& this.bcryptPasswordEncoder.matches(user.getUserPwd(), loginUser.getUserPwd())) {
+		
 			session.setAttribute("loginUser", loginUser);
 			status.setComplete(); // 로그인 성공 결과를 보냄(HttpStatus code 200 보냄)
 			return "common/main";			
@@ -103,18 +123,106 @@ public class MemberController {
 		 }
 	}
 	
-	// 회원 가입 요청 처리용 메소드
-	@RequestMapping(value="enroll.do", method=RequestMethod.POST)
-	public String memberInsertMethod(Member member, Model model) {
-		logger.info("enroll.do : " + member); // 전송온 값 확인
-		
-		if(memberService.insertMember(member) > 0) {
-			return "member/loginPage";
+	
+	// ajax 통신으로 가입할 회원의 아이디 중복 검사 요청 처리용 메소드
+	@RequestMapping(value="idchk.do", method=RequestMethod.POST)
+	@ResponseBody
+	public void dupCheckIdMethod(@RequestParam("userid") String userId,
+			HttpServletResponse response) throws IOException {
+		int userIdCount = memberService.selectCheckId(userId);
+		String returnStr = null;
+		if(userIdCount == 0 ) {
+			returnStr = "ok";
 		}else {
+			returnStr = "dup";
+		}
+		// response 를 이용해서 클라이언트와 출력스트림을 열어서 문자열값 내보냄
+		response.setContentType("tesx/html; charset=utf-8");
+		PrintWriter out = response.getWriter();
+		out.append(returnStr);
+		out.flush();
+		out.close();
+	}
+	
+	
+	
+	/*
+	 * // 회원 가입 요청 처리용 메소드 (사진파일 첨부 기능이 없는 경우 처리 방식)
+	 * 
+	 * @RequestMapping(value="enroll.do", method=RequestMethod.POST) public String
+	 * memberInsertMethod(Member member, Model model) { logger.info("enroll.do : " +
+	 * member); // 전송온 값 확인
+	 * 
+	 * // 패스워드 암호화 처리 // String encodePwd =
+	 * bcryptPasswordEncoder.encode(member.getUserPwd()); //
+	 * member.setUserPwd(encodePwd);
+	 * member.setUserPwd(bcryptPasswordEncoder.encode(member.getUserPwd()));
+	 * logger.info("after encode : " + member.getUserPwd() + ", lenght : " +
+	 * member.getUserPwd().length());
+	 * 
+	 * 
+	 * if(memberService.insertMember(member) > 0) { // 회원가입 성공시 return
+	 * "member/loginPage"; }else {// 회원가입 실패시 model.addAttribute("message",
+	 * "회원 가입 실패! 확인하고 다시 가입해 주세요"); return "common/error"; } }
+	 */
+	
+	// 회원 가입 요청 처리용 메소드 (파일 첨부 기능이 있는 경우 처리 방식) => 첨부된 파일은 별도로 전송받도록 처리
+	// 서버상의 파일 저장 폴더 지정을 위해서 request 객체가 사용됨
+	// 업로드되는 파일은 따로 전송받음 => multipart 방식으로 전송옴 => spring 이 제공하는 MultipartFile 사용함
+	@RequestMapping(value = "enroll.do", method = RequestMethod.POST)
+	public String memberInsertMethod(Member member, Model model,
+			HttpServletRequest request, @RequestParam("photofile") MultipartFile mfile) {
+		logger.info("enroll.do : " + member); // 전송온 값 확인
+
+		// 패스워드 암호화 처리
+//			String encodePwd = bcryptPasswordEncoder.encode(member.getUserPwd());
+//			member.setUserPwd(encodePwd);
+		member.setUserPwd(bcryptPasswordEncoder.encode(member.getUserPwd()));
+		logger.info("after encode : " + member.getUserPwd() + ", lenght : " + member.getUserPwd().length());
+
+		// 회원가입시 사진 파일첨부가 있을 경우, 저장 폴더 경로 지정 ------------------------
+		String savePath = request.getSession().getServletContext().getRealPath("/resources/photo_files");
+		// 서버 엔진이 구동하는 웹에플리케이션(Context)의 루트(webapp) 아래의 "resources/photo_files" 까지의 
+		// 경로 정보를 조회함
+		logger.info("savePath : " + savePath);
+		
+		// 첨부파일이 있다면
+		if(!mfile.isEmpty()) {
+			// 전송온 파일 이름 추출
+			String fileName = mfile.getOriginalFilename();
+			
+			// 여러 회원이 업로드한 사진 파일명이 중복될 경우를 대비해서 저장파일명 이름바꾸기
+			// 바꿀 파일 이름은 개발자가 정함
+			// userId 가 기본키이므로 중복이 안됨 => userId_filename 저장형태로 정해봄.
+			String renameFileName = member.getUserId() + "_" + fileName;
+			
+			// 저장 폴더에 저장 처리
+			if(fileName != null && fileName.length() > 0) {
+				try {
+					/* mfile.transferTo(new File(savePath + "\\" + fileName)); */
+					// 저장시 바뀐 이름으로 저장 처리함
+					mfile.transferTo(new File(savePath + "\\" + renameFileName));
+				} catch (Exception e) {
+					// 첨부파일 저장시 에러 발생
+					e.printStackTrace();
+					model.addAttribute("message", "첨부파일 업로드 실패!");
+					return "common/error";
+				}
+			}
+			// 파일 업로드 정상 처리되었다면
+			// member.setPhotoFileName(fileName); // db 저장시에 원래 이름으로 기록함
+			member.setPhotoFileName(renameFileName); // db 저장시에는 변경된 이름으로 기록함.
+		}// 첨부파일이 있을 때
+		
+		if (memberService.insertMember(member) > 0) { // 회원가입 성공시
+			return "member/loginPage";
+		} else {// 회원가입 실패시
 			model.addAttribute("message", "회원 가입 실패! 확인하고 다시 가입해 주세요");
-			return "common/error";			
+			return "common/error";
 		}
 	}
+	
+	
 	
 	// '내 정보 보기' 클릭시 회원 정보 조회 요청 처리용 메소드
 	// 컨트롤러에서 뷰리졸버로 리턴하는 타입은 String(뷰 파일명), ModelAndView 를 사용할 수 있음
@@ -130,7 +238,13 @@ public class MemberController {
 		Member member = memberService.selectMember(userId);
 		
 		if(member != null) { // 전송온 아이디로 회원 조회 성공시
+			// 첨부된 사진파일이 있다면, 원래 파일명으로 변경해서 뷰로 전달함
+		String originalFilename = null;
+		if(member.getPhotoFileName()!= null) {
+			originalFilename = member.getPhotoFileName().substring(member.getPhotoFileName().indexOf('_') + 1);
+		}
 			model.addAttribute("member", member);
+			model.addAttribute("ofile", originalFilename);
 			return "member/infoPage";
 		}else { // 조회 실패시
 			model.addAttribute("message", userId + "에 대한 회원 정보 조회 실패!");
@@ -139,19 +253,85 @@ public class MemberController {
 		
 	}
 	
+	@RequestMapping(value="mupdate.do", method=RequestMethod.POST)
+	public String memberUpdateMethod(Member member, Model model, HttpServletRequest request, 
+			@RequestParam("photofile") MultipartFile mfile,
+			@RequestParam("originalUserPwd") String originalUserPwd,
+			@RequestParam("ofile") String originalFileName) {
+			logger.info("mupdate.do : " + member); // 전송온 값 확인
+		
+		if(member.getUserPwd() != null && member.getUserPwd().length() > 0) { // 암호가 변경되었다면
+			// 패스워드 암호화 처리
+//			String encodePwd = bcryptPasswordEncoder.encode(member.getUserPwd());
+//			member.setUserPwd(encodePwd);
+			member.setUserPwd(bcryptPasswordEncoder.encode(member.getUserPwd()));
+			logger.info("after encode : " + member.getUserPwd() + ", lenght : " + member.getUserPwd().length());
+		}else { // 암호가 변경되지 않았다면 userPwd == null
+			member.setUserPwd(originalUserPwd); // 원래 패스워드로 기록 저장
+		}
+
+	// 회원가입시 사진 파일첨부가 있을 경우, 저장 폴더 경로 지정 ------------------------
+	String savePath = request.getSession().getServletContext().getRealPath("/resources/photo_files");
+	// 서버 엔진이 구동하는 웹에플리케이션(Context)의 루트(webapp) 아래의 "resources/photo_files" 까지의 
+	// 경로 정보를 조회함
+	logger.info("savePath : " + savePath);
 	
+	// 첨부파일이 있다면
+	if(!mfile.isEmpty()) {
+		// 전송온 파일 이름 추출
+		String fileName = mfile.getOriginalFilename();
+		
+		// 이전 파일명과 새로 첨부된 파일명이 다른지 확인
+		if(!fileName.equals(originalFileName)) {			
+		
+		
+		// 여러 회원이 업로드한 사진 파일명이 중복될 경우를 대비해서 저장파일명 이름바꾸기
+		// 바꿀 파일 이름은 개발자가 정함
+		// userId 가 기본키이므로 중복이 안됨 => userId_filename 저장형태로 정해봄.
+		String renameFileName = member.getUserId() + "_" + fileName;
+		
+		// 저장 폴더에 저장 처리
+		if(fileName != null && fileName.length() > 0) {
+			try {
+				/* mfile.transferTo(new File(savePath + "\\" + fileName)); */
+				// 저장시 바뀐 이름으로 저장 처리함
+				mfile.transferTo(new File(savePath + "\\" + renameFileName));
+			} catch (Exception e) {
+				// 첨부파일 저장시 에러 발생
+				e.printStackTrace();
+				model.addAttribute("message", "첨부파일 업로드 실패!");
+				return "common/error";
+			}
+		}
+		// 파일 업로드 정상 처리되었다면
+		// member.setPhotoFileName(fileName); // db 저장시에 원래 이름으로 기록함
+		member.setPhotoFileName(renameFileName); // db 저장시에는 변경된 이름으로 기록함.
+	}// 첨부파일이 있을 때
+	} else {// 수정된 첨부파일과 원래 첨부파일명이 다른 경우 (폴더에 저장된 상태임)
+		member.setPhotoFileName(originalFileName);
+	}
 	
+	if (memberService.updateMember(member) > 0) { // 회원정보 수정 성공시
+		return "redirect:main.do";
+	} else {// 회원정보 수정 실패시
+		model.addAttribute("message", "회원 정보 수정 실패! 확인하고 다시 수정해 주세요");
+		return "common/error";
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
+	
+	// 회원 탈퇴(삭제)
+	@RequestMapping("mdelete.do")
+	public String memberDeleteMethod(@RequestParam("userid") String userId, Model model) {
+		// 회원 탈퇴 요청시 자동 로그아웃 처리해야 함
+		if(memberService.deleteMember(userId) > 0) {
+			// 컨트롤러 또는 다른 컨트롤러에 메소드를 직접 호출할 경우
+			return "redirect:logout.do";
+		}else {
+			model.addAttribute("message", userId + "님의 회원 탈퇴 실패! 관리자에게 문의하세요.");
+			return "common/error";
+		}
+	}
+	
+	
+	
+} // MemberController.class

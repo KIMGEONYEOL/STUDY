@@ -1,0 +1,12 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>testEL</title>
+</head>
+<body>
+testCore.jsp 에서 만든 sum 변수 값(scope="session" 임) : ${ sum } <br>
+</body>
+</html>

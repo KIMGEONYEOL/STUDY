@@ -1,0 +1,10 @@
+package org.myweb.first.test.model.dto;
+
+public class Test implements java.io.Serializable {
+	private static final long serialVersionUID = 4708397828141028895L;
+	
+	private String name; // NAME VARCHAR2(30 BYTE)
+	private int age; 	 // AGE	NUMBER
+	
+	
+}

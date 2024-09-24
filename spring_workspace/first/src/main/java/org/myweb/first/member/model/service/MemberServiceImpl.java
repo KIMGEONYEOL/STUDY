@@ -1,5 +1,7 @@
 package org.myweb.first.member.model.service;
 
+import java.util.ArrayList;
+
 import org.myweb.first.member.model.dao.MemberDao;
 import org.myweb.first.member.model.dto.Member;
 import org.myweb.first.member.model.dto.User;
@@ -26,6 +28,28 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public Member selectMember(String userId) {
 		return memberDao.selectMember(userId);
+	}
+
+	@Override
+	public int updateMember(Member member) {
+		return memberDao.updateMember(member);
+	}
+
+	@Override
+	public int deleteMember(String userId) {	
+		return memberDao.deleteMember(userId);
+	}
+
+	@Override
+	public ArrayList<Member> selectList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int selectCheckId(String userId) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }//MemberService end

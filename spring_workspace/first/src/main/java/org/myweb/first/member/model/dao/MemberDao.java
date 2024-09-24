@@ -20,6 +20,12 @@ public class MemberDao {
 		return sqlSessionTemplate.selectOne("memberMapper.selectLogin", user);
 	}
 	
+	// 회원 가입시 아이디 중복 검사용 쿼리
+	public int selectCheckId(String userid) {
+		return sqlSessionTemplate.selectOne("memberMapper.selectCheckId", userid);
+	}
+	
+	
 	// 회원가입 처리용
 	public int insertMember(Member member) {
 		return sqlSessionTemplate.insert("memberMapper.insertMember", member);
@@ -29,5 +35,18 @@ public class MemberDao {
 	public Member selectMember(String userId) {
 		return sqlSessionTemplate.selectOne("memberMapper.selectMember", userId);
 	}
+	
+	// 회원 정보 수정 요청 처리용 메서드
+	public int updateMember(Member member) {
+		return sqlSessionTemplate.update("memberMapper.updateMember", member);
+	}
+	
+	// 회원 삭제 처리용
+	public int deleteMember(String userId) {
+		return sqlSessionTemplate.delete("memberMapper.deleteMember", userId);
+	}
+	
+	
+	
 	
 }

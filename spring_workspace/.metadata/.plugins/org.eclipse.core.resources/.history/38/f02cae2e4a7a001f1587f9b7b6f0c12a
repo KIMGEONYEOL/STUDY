@@ -1,0 +1,9 @@
+package org.myweb.first.notice.model.dao;
+
+import org.springframework.stereotype.Repository;
+
+@Repository("noticeDao")
+public class NoticeDao {
+	@Autowired
+	private SqlSessionTemplate sqlSessionTemplate;
+}

@@ -1,0 +1,6 @@
+package org.myweb.first.test.model.service;
+
+@Service("testService")
+public class TestServiceImpl implements TestService {
+
+}

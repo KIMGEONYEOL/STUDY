@@ -1,0 +1,14 @@
+package org.ict.testjstl.test.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class TestController {
+	
+	// 요청시 해당 뷰 페이지로 이동 처리용 메소드
+	@RequestMapping("testel.do")
+	public String moveELPage() {
+		return "test/testEL";
+	}
+}

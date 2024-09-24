@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" import="org.myweb.first.member.model.dto.User"%>
+    pageEncoding="UTF-8" %>
+<%--
+<%@ page import="org.myweb.first.member.model.dto.Member" %>
 <%
 	// 로그인 상태를 확인하기 위해서 세션 객체에 저장된 로그인한 회원의 정보를 추출
-	User loginUser = (User)session.getAttribute("loginUser");
-%>  
-
+	// User loginUser = (User)session.getAttribute("loginUser");
+	Member loginUser = (Member)session.getAttribute("loginUser");
+%>   --%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 
 <!DOCTYPE html>
@@ -62,12 +65,24 @@ function movePage(){
 </head>
 <body>
 <h1>firstServleProject : first</h1>
+<%-- 메뉴바 표시 --%>
+<%-- <%@ include file="menubar.jsp"  %> --%>
+<%-- jspl 에서는 / 가  context-root 를 의미함 
+	 속성 url 은 브라우저 상단에 표시되는 페이지 경로에 대한 url 을 의미함
+	 기본 웰컴 페이지의 url 이 http://localhost:8088/first 이므로
+	 기본 url 뒤에 표기될 추가 url 로 보면 됨
+	 전체 url : http://localhost:8088/first/WEB-INF/views/common/menubar.jsp
+	 기본 url 은 생략할 수 있으므로
+	 url : /WEB-INF/views/common/menubar.jsp
+--%>
+<c:import url="/WEB-INF/views/common/menubar.jsp" />
 <hr>
 <header>
 	<div id="banner" class="lineA">
 		<img src="/first/resources/images/photo2.jpg">
 	</div>
-	<% if(loginUser == null){ // 로그인 하지 않은 상태일 때 %>
+	<%-- <% if(loginUser == null){ // 로그인 하지 않은 상태일 때 %> --%>
+	<c:if test="${ empty sessionScope.loginUser }">
 		<div id="loginBox" class="lineA">
 			first 사이트 방문을 환영합니다.<br>
 			<button onclick="movePage()">first 로그인</button><br>
@@ -75,9 +90,12 @@ function movePage(){
 			<a href="enrollPage.do">회원가입</a>
 			<%-- 회원가입 클릭하면 회원가입페이지가 연결되어 출력되겍 링크 설정했음 --%>
 		</div>
-	<% }else{ // 로그인 했을 때 %>
+	</c:if>
+	<%-- <% }else{ // 로그인 했을 때 %> --%>
+	<c:if test="${ !empty sessionScope.loginUser }">
 		<div id="loginBox" class="lineA">
-			<%= loginUser.getUserName() %> 님 &nbsp; 
+			<%-- <%= loginUser.getUserName() %> --%>
+			${ sessionScope.loginUser.userName } 님 &nbsp; 
 			<a href="logout.do">로그아웃</a> <br>
 			메일 0, 쪽지 0 
 			<!-- a 태그로 서비스를 위한 url 요청시, 값도 같이 보내려면 쿼릿 ㅡ트링을 사용해야 함
@@ -85,15 +103,20 @@ function movePage(){
 				?전송이름=보낼값&전송이름=보낼값 : 쿼리스트링(queryString) 이라고 함
 				주의 : 쿼리스트링에는 공백 있으면 안됨.
 			 -->
-			<a href="myinfo.do?userId=<%= loginUser.getUserId() %>">내 정보 보기</a>
+			<a href="myinfo.do?userId=<%-- <%= loginUser.getUserId() %> --%>
+									  "${ sessionScope.loginUser.userId}">내 정보 보기</a>
 		</div>
-	<%} %>
+	</c:if>
+	<%-- <%} %> --%>
 </header>
 
-
-
-
-
+<hr style="clear:both;">
+<%-- jsp 파일 안에 별도로 작성된 jsp(권장), html 파일을 포함할 수 있다.
+	 주의 : 상대경로만 사용할 수 있음
+ --%>
+ <c:import url="/WEB-INF/views/common/footer.jsp"/>
+ <%-- <%@ include file="footer.jsp" %> --%>
+ 
 
 
 

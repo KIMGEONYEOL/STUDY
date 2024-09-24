@@ -1,0 +1,17 @@
+package org.myweb.first.notice.model.dto;
+
+public class Notice implements java.io.Serializable {
+	private static final long serialVersionUID = -8269302835859129601L;
+
+	private int noticeNo;				//	NOTICENO	NUMBER
+	private String noticeTitle;			//	NOTICETITLE	VARCHAR2(50 BYTE)
+	private java.sql.Date noticeDate;	//	NOTICEDATE	DATE
+	private String noticeWriter;		//	NOTICEWRITER	VARCHAR2(50 BYTE)
+	private String noticeContent;		//	NOTICECONTENT	VARCHAR2(2000 BYTE)
+	private String orginalFilePath;		//	ORIGINAL_FILEPATH	VARCHAR2(100 BYTE)
+	private String renameFilePath;		//	RENAME_FILEPATH	VARCHAR2(100 BYTE)
+	private String importance;			//	IMPORTANCE	CHAR(1 BYTE)
+	private java.sql.Date impEndDate;	//	IMP_END_DATE	DATE
+	private int readCound;				//	READCOUNT	NUMBER
+	
+}

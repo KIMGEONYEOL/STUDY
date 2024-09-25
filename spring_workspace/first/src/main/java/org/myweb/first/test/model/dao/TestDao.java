@@ -11,6 +11,7 @@ public class TestDao {
 	@Autowired
 	private SqlSessionTemplate sqlSessionTemplate;
 	
+	
 	public int selectTest(Test test) {
 		return sqlSessionTemplate.selectOne("testMapper.selectTest", test);
 	}

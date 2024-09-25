@@ -25,6 +25,32 @@
 		where noticeno = (select max(noticeno) from notice)
 	</select>
 	
+	<!-- 공지 제목 검색용 쿼리 -->
+	<select id="selectSearchTitleKeyword" parameterType="string" resultMap="resultNotice">
+		select * from notice
+		where noticetitle like '%' || #{ keyword } || '%'
+		order by importance desc, noticeno desc
+	</select>	
+	
+	
+	<!-- 새 공지글 등록용 쿼리 -->
+	<insert id="insertNotice" parameterType="Notice">
+		insert into notice
+		<if test="importance != null">
+		values ((select max(noticeno) + 1 from notice ),
+				#{ noticeTitle }, sysdate, #{ noticeWriter }, #{ noticeContent },
+				#{ orginalFilePath}, #{ renameFilePath }, #{ importance }, #{ impEndDate } )
+		</if>
+		
+		<if test="importance == null">
+		values ((select max(noticeno) + 1 from notice ),
+				#{ noticeTitle }, sysdate, #{ noticeWriter }, #{ noticeContent },
+				#{ orginalFilePath}, #{ renameFilePath }, default, sysdate, default )
+		</if>
+	</insert>
+	
+	
+	
 </mapper>
 
 

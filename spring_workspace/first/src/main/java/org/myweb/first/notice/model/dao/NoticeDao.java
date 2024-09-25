@@ -1,5 +1,8 @@
 package org.myweb.first.notice.model.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.myweb.first.notice.model.dto.Notice;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,5 +18,15 @@ public class NoticeDao {
 		return sqlSessionTemplate.selectOne("noticeMapper.selectLast");
 	}
 	
+	// 공지 제목 검색
+	public ArrayList<Notice> selectSearchTitle(String keyword){
+		List<Notice> list = sqlSessionTemplate.selectList("noticeMapper.selectSearchTitleKeyword", keyword);
+		return (ArrayList<Notice>)list;
+	}
+	
+	// 신규 공지 등록
+	public int insertNotice(Notice notice) {
+		return sqlSessionTemplate.insert("noticeMapper.insertNotice", notice);
+	}
 	
 }

@@ -123,9 +123,331 @@ $(function(){
 		}); 
 	});
 </script>
+<hr>
+
+<h2>4. 서버로 전송값 있고, 결과로 json 배열 받아서 출력</h2>
+<label>검색 제목 키워드 입력 : <input type="search" id="keyword"></label> <br>
+<div id="d4" style="width:400px;height:400px;border:1px solid red;">
+	<table id="tblist" border="1" cellspacing="0">
+		<tr bgcolor="gray">
+			<th>번호</th>
+			<th>제목</th>
+			<th>작성자</th>
+			<th>날짜</th>
+		</tr>
+	</table>
+</div>
+<button id="test4">테스트4</button>
+
+<script type="text/javascript">
+$(function(){
+	// jQuery('selector').method(...);	줄여서 $('태그선택자').이벤트메소드(function(){ 이벤트 발생시 실행할 내용});
+	$('#test4').on('click', function(){
+		// jQuery.ajax({ settings });
+		$.ajax({
+			url: 'test4.do',
+			type: 'post',
+			data: { keyword: $('#keyword').val()}, //$('#keyword').val() == document.getElementById('keyword').value
+			success: function(data){
+				// json 배열을 담은 객체를 리턴받은 경우임
+				console.log('data : ' + data); // data: [object, Object]
+				
+				// object => string
+				var objStr = JSON.stringify(data);
+				// string => json : parsing
+				var jsonObj = JSON.parse(objStr);
+				
+				var output = $('#tblist').html();
+				// var output = document.getElementById('tblist').innerHTML;
+				// jksonObj 안의 list 가 가진 json 객체 정보를 하나씩 꺼내서 새로운 행을 추가해 나감
+				for(var i in jsonObj.list){
+					 output += '<tr><td>' + jsonObj.list[i].noticeno
+					 + '</td><td>' + decodeURLComponet(jsonObj.list[i].noticetitle).replace(/\+/gi, ' ')
+					 + '</td><td>' + jsonObj.list[i].noticewriter
+					 + '</td><td>' + jsonObj.list[i].noticedate
+					 + '</td></tr>';
+				}
+				
+				// 테이블에 기록 처리
+				$('#tblist').html(output);
+				// document.getElementById('tblist').innerHTML = output;
+				
+			},
+			error: function(request, status, errorData){ // 요청이 실패했을 때 실행되는 함수임
+				console.log("error code : " + request.status + "\nMessage : " + request.responseText
+				+ "\nError : " + errorData );
+			}
+		})
+	});
+});
+</script>
+<hr>
+
+<h2>5. 서버로 json 객체를 보내기</h2>
+<div>
+	<fieldset>
+	<legend>새 공지글 등록하세요.</legend>
+	제목 : <input type="text" id="title"> <br>
+	작성자 : <input type="text" id="writer" value="${ sessionScope.loginUser.userId }" readonly><br>
+	내용 : <textarea rows="5" cols="50" id="content"></textarea><br>
+	</fieldset>
+</div>
+<button id="test5">테스트5</button>
+
+<script type="text/javascript">
+$(function(){
+	$('#test5').on('click', function(){
+		// 자바스크립트에서 json 객체 만들기
+		// var job = { name: '홍길동', age: 30 }; 형식으로 만들 수 있음
+		var job = new Object();
+		job.title = $('#title').val();
+		job.writer = $('#writer').val(); // document.getElementById('writer').value
+		job.content = $('#content').val();
+		
+		$.ajax({
+			url: 'test5.do',
+			type: 'post',
+			data: JSON.stringify(job),
+			contentType: 'application/json; charset=utf-8',
+			success: function(data){
+				alert('요청 성공 : ' + data);
+				
+				// input 에 기록된 값 삭제함
+				$('#title').val('');
+				$('#content').val('');
+			},			
+			error: function(request, status, errorData){ // 요청이 실패했을 때 실행되는 함수임
+				console.log("error code : " + request.status + "\nMessage : " + request.responseText
+				+ "\nError : " + errorData );
+			}
+			
+		}); // ajax
+		
+	}); // on
+}); // document.ready
+</script>
+<hr>
+
+<h2>6. 서버로 json. 배열 보내기</h2>
+<div>
+	<fieldset>
+	<legend>공지글 여러 개 한번에 등록하기</legend>
+	제목 : <input type="tesx" id="ntitle"> <br>
+	작성자 : <input type="text" id="nwriter" value="${ sessionScope.loginUser.userId }"><br>
+	내용 : <textarea rows="5" cols="50" id="ncontent"></textarea>
+	</fieldset>
+	<input type="button" id="addBtn" value="추가하기">
+</div>
+<p id="p6" style="width:400px;height:150px;border:1px solid red;"></p>
+<button id="test6">테스트6</button>
+<script type="text/javascript">
+$(function(){
+	// 자바스크립트에서 배열 만들기
+	// var jarr = new Array(배열크기); // index 이용할 수 있음
+	// jarr[0] = { name : '홍길동', age : 30}; 저장 기록함
+	
+	// var jarr2 = new Array(); // index 없음, 스택(stack) 구조가 됨(LIFO : Last Input First Output)
+	// 저장 : push(). 꺼내기 : pop() 사용함
+	// jarr2.push({ name: '홍길동', age: 40 });
+	
+	// 배열 초기화
+	/*
+		var jarr3 = [
+					{name : '홍길동', age : 30}, 
+					{name: '홍박사', age: 40}, 
+					{name: '홍대리', age: 23}, ...];
+	*/
+	var jarr = new Array();
+	var pStr = $('#p6').html();
+	
+	// 추가하기 버튼 클릭시 입력값들을 읽어서 json 객체를 만들고
+	// p6 태그 영역에 json string 으로 추가 기록 처리함
+	$('#addBtn').on('click', function(){
+		// json 객체 만들기
+		var job = new Object();
+		job.title = $('#ntitle').val();
+		job.writer = $('#nwriter').val(); // document.getElementById('writer').value
+		job.content = $('#ncontent').val();
+		
+		jarr.push(job);
+		
+		pStr += JSON.stringify(job);
+		$('#p6').html(pStr + '<br>');
+		
+		// 기존에 기록된 input 의 값은 지우기
+		$('#ntitle').val('');
+		$('#ncontent').val('');
+	}); // addBtn click
+	
+	$('#test6').on('click', function(){
+		$.ajax({
+			url: 'test6.do',
+			type: 'post',
+			data: JSON.stringify(jarr),
+			contentType: "application/json;",
+			success: function(data){
+				alert('요청 성공 :' + data)
+			},
+			error: function(request, status, errorData){ // 요청이 실패했을 때 실행되는 함수임
+				console.log("error code : " + request.status + "\nMessage : " + request.responseText
+				+ "\nError : " + errorData );
+			}
+		}); // ajax
+	}); // test6 click
+	
+	
+}); // document.ready
+</script>
+
+<h2>7. ajax 로 파일 업로드 처리 (form 을 전송)</h2>
+<h3>jQuery 기반 ajax 파일업로드 form 전송</h3>
+<form id="fileform">
+	메세지 : <input type="text" name="message"> <br>
+	첨부파일 : <input type="file" name="upfile"> <br>
+	<input type="button" value="업로드" onclick="uploadFile();">
+</form>
+
+<h3>javascript 기반 ajax 파일업로드 form 전송</h3>
+<form id="fileform2">
+	메세지 : <input type="text" name="message"> <br>
+	첨부파일 : <input type="file" name="upfile"> <br>
+	<input type="button" value="업로드" onclick="uploadFile2();">
+</form>
+
+<script type="text/javascript">
+function uploadFile(){
+	// jQuery ajax() 로 파일업로드용 form 전송 처리
+	
+	// body 의 form 태그를 객체로 생성함
+	var form = $('#fileform')[0]; // 인덱스 사용에 주의할 것
+	// form 태그 안의 입력양식들의 값들을 담을 FormData 객체 생성함
+	var formData = new FormData(form);
+	
+	$.ajax({
+		url: 'testFileUp.do',
+		processData: false, // multipart 전송은 false 로 지정해야 함
+		contentType: false, // multipart 전송은 false 로 지정해야 함
+		type: 'post',
+		data: formData,
+		success: function(data){
+			alert('파일업로드 성공 : ' + data);
+		},
+		error: function(request, status, errorData){ // 	요청이 실패했을 때 실행되는 함수임
+			console.log("error code : " + request.status + "\nMessage : " + request.responseText
+			+ "\nError : " + errorData );
+		}
+	}); // ajax
+} // upoloadFile()
+
+function uploadFile2(){
+	// javascript 로 ajax 기술 사용해서 파일업로드용 form 전송 처리
+	var form = document.getElementById('fileform2');
+	var formData = new FormData(form);
+	
+	// 브라우저에서 제공하는 ajax 를 위한 객체 생성
+	var xhRequest;
+	if(window.XMLHttpRequest){
+		xhRequest = new XMLHttpRequest();
+	}else{
+		xhRequest = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	// ajax 요청
+	// 1. 요청 처리에 대한 상태코드가 변경되면, 작동할 내용을 미리 설정함
+	xhRequest.onreadystatechange = function(){
+		if(xhRequest.readyState == 4 && xhRequest.status == 200){
+			// 요청이 성공하면 alert 창에 응답온 문자를 출력함
+			alert(xhRequest.responseText);
+		}
+	};
+	
+	// 2. url 요청하고 전송데이터 보내기함
+	xhRequest.open("POST", "testFileUp.do", true);
+	xhRequest.send(formData);
+	
+}// uploadFile2()
+
+</script>
+<hr>
+
+<h2>8. ajax 로 파일 다운로드</h2>
+<h3>jQuery 기반 ajax 이용 파일 다운로드</h3>
+<a id="fdown" onclick="fileDown();">sample.txt</a> <br><br>
+
+<h3>javascript 기반 ajax 이용 파일 다운로드</h3>
+<a id="fdown2" onclick="fileDown2();">sample.txt</a> <br><br>
+
+<script type="text/javascript">
+function fileDown(){
+	// jQuery ajax 사용 파일 다운로드 처리
+	// a 태그로 링크된 파일이름 클릭하면, 서버로 다운로드 요청함
+	
+	// a 태그에서 다운받을 파일명을 얻어옴
+	var filename = $('#fdown').text();
+	console.log('filename :' + filename);
+	
+	$.ajax({
+		url: 'filedown.do',
+		type: 'get', // get 이 기본값이므로 생략 가능\
+		data: { 'filename': filename },
+		xhrFields: { responseType: 'blob'}, // response 데이터를 바이너리(blob)로 지정해야 함.
+		success: function(data){
+			console.log('파일 다운로드 요청 성공!');
+			
+			// 응답온 파일 데이터를 Blob 객체로 만듦
+			var blob = new Blob([data]);
+			
+			// 클라이언트 쪽에 파일을 저장 처리 : 다운로드
+			if(navigator.msSaveBlob){
+				return navigator.msSaveBlob(blob, filename);
+			}else{
+				var link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = filename;
+				link.click();
+			}
+		},
+		error: function(request, status, errorData){ // 	요청이 실패했을 때 실행되는 함수임
+			console.log("error code : " + request.status + "\nMessage : " + request.responseText
+			+ "\nError : " + errorData );
+		}
+		
+	});
+}
+	
+
+
+function fileDown2(){
+	// javascript ajax 로 파일 다운로드 처리
+	// a 태그(다운받을 파일명) 클릭하면 서버로 다운로드 요청함
+	
+	var filename = document.getElementById('fdown2').innerHTML;
+	var filedownURL = "filedown.do";
+	
+	// 브라우저에 ajax 처리용 객체가 제공된다면
+	if(window.XMLHttpRequest || 'ActiveXObject' in window){
+		var link = document.createElement('a');
+		link.href = filedownURL + "?filename=" + filename;
+		link.download = filename || filedownURL;
+		link.click();
+	}else{
+		// 브라우저에 ajax 처리용 객체가 제공되지 않는다면 
+		var _window = window.open(filedownURL, filename);
+		_window.document.close();
+		_window.document.execCommand('SaveAs', true, filename || filedownURL);
+		_window.close();
+	}
+	
+}
+
+
+</script>
 
 
 
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </body>
 </html>
 

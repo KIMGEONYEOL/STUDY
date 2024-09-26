@@ -1,0 +1,6 @@
+package org.myweb.first.board.model.dto;
+
+public class Board implements java.io.Serializable {
+	private static final long serialVersionUID = -6086290596677675589L;
+	
+}

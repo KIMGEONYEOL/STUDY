@@ -18,11 +18,13 @@
 		<typeAlias type="org.myweb.first.member.model.dto.Member" alias="Member" />
 		<typeAlias type="org.myweb.first.test.model.dto.Test" alias="Test"/>
 		<typeAlias type="org.myweb.first.notice.model.dto.Notice" alias="Notice"/>
+		<typeAlias type="org.myweb.first.board.model.dto.Board" alias="Board"/>
 	</typeAliases>
 	
 	<mappers>
 		<mapper resource="mappers/member-mapper.xml" />
 		<mapper resource="mappers/test-mapper.xml" />
 		<mapper resource="mappers/notice-mapper.xml" />
+		<mapper resource="mappers/board-mapper.xml" />
 	</mappers>
 </configuration>

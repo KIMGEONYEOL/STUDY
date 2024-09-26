@@ -18,6 +18,13 @@ public class NoticeDao {
 		return sqlSessionTemplate.selectOne("noticeMapper.selectLast");
 	}
 	
+	// ajax : 최근 등록 공지글 3개 조회용
+	public ArrayList<Notice> selectTop3(){
+		List<Notice> list = sqlSessionTemplate.selectList("noticeMapper.selectTop3");
+		return (ArrayList<Notice>)list;
+	}
+	
+	
 	// 공지 제목 검색
 	public ArrayList<Notice> selectSearchTitle(String keyword){
 		List<Notice> list = sqlSessionTemplate.selectList("noticeMapper.selectSearchTitleKeyword", keyword);
@@ -28,5 +35,7 @@ public class NoticeDao {
 	public int insertNotice(Notice notice) {
 		return sqlSessionTemplate.insert("noticeMapper.insertNotice", notice);
 	}
+	
+	
 	
 }

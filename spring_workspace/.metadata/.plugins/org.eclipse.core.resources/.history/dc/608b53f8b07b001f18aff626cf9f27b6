@@ -1,0 +1,6 @@
+package org.myweb.first.board.model.service;
+
+@Service("boardService")
+public class BoardServiceImpl implements BoardService {
+
+}

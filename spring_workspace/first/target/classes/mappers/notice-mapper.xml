@@ -16,7 +16,14 @@
 			<result property="impEndDate" column="IMP_END_DATE" />
 			<result property="readCound" column="READCOUNT" />
 	</resultMap>
-	
+
+
+
+	<resultMap type="Notice" id="resultTop3">
+			<result property="noticeNo" column="NOTICENO" />
+			<result property="noticeTitle" column="NOTICETITLE" />
+			<result property="noticeDate" column="NOTICEDATE" />
+	</resultMap>
 
 
 	<!-- ajax 테스트용 : 최근 등록된 마지막 공지글 한 개 조회용 -->
@@ -24,6 +31,17 @@
 		select * from notice
 		where noticeno = (select max(noticeno) from notice)
 	</select>
+	
+	<!-- ajax 요청 : 최근 등록 게시글 3개 조회용 (top-N) -->
+	<select id="selectTop3" resultMap="resultTop3">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, NOTICENO, NOTICETITLE, NOTICEDATE
+	      		FROM (SELECT * FROM NOTICE
+				WHERE IMPORTANCE = 'N'
+				ORDER BY NOTICEDATE DESC, NOTICENO DESC))
+		WHERE RNUM BETWEEN 1 AND 3
+	</select>
+	
 	
 	<!-- 공지 제목 검색용 쿼리 -->
 	<select id="selectSearchTitleKeyword" parameterType="string" resultMap="resultNotice">

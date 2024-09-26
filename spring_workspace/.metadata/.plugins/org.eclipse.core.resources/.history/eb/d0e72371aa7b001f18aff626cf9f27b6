@@ -1,0 +1,9 @@
+package org.myweb.first.notice.controller;
+
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class NoticeController {
+	
+	// 요청 처리용 메소드 ------------------------------------------
+}

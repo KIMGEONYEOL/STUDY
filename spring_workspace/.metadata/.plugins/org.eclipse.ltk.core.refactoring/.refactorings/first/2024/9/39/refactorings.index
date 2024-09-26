@@ -9,3 +9,7 @@
 1727143658995	Copy file
 1727143778760	Rename package 'org.myweb.first.test.service'
 1727163696981	Copy file
+1727318220986	Copy file
+1727318440111	Rename package 'org.myweb.first.board.dao'
+1727318449198	Rename package 'org.myweb.first.board.dto'
+1727318912344	Rename type 'BoardDto'

@@ -6,6 +6,8 @@ import org.myweb.first.notice.model.dto.Notice;
 
 public interface NoticeService {
 	Notice selectLast();
+	ArrayList<Notice> selectTop3();
 	ArrayList<Notice> selectSearchTitle(String keyword);
 	int insertNotice(Notice notice);
+	
 }

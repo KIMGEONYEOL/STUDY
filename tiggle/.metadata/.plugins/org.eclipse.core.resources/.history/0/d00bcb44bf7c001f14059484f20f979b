@@ -1,0 +1,5 @@
+package com.ex.tiggle.member.model.service;
+
+public class UserServiceImpl {
+
+}

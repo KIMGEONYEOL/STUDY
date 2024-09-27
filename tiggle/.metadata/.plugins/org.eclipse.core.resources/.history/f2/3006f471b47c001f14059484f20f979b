@@ -1,0 +1,23 @@
+package com.ex.tiggle.exhibition.model.dto;
+
+public class Exhibition {
+	private String totalId;//	totalId : String	
+	private String uuid; // uuid : String	
+	private String title;// title : String	
+	private String contributor; // contributor : String	
+	private String description; // description : String	
+	private String eventSite; // eventSite : String	
+	private String detailEventSite; // detailEventSite : String	
+	private double latitude;// latitude : double	
+	private double longitude;// longitude : double	
+	private String genre; // genre : String	
+	private String cotactPoint;//contactPoint : String	
+	private int viewCounter;// viewCounter : int	
+	private String url; // url : String	
+	private java.sql.Date startDate;// startDate : date	
+	private java.sql.Date endDate; // endDate : date	
+	private String approvalStatus; // approvalStatus : String	
+	private int category;// category : int	
+	private String fileUrl; // fileUrl : String	
+
+}

@@ -1,2 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="java.sql.Date"/>
+    <fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+    <fullyQualifiedTypeName name="com.ex.tiggle.exhibition.model.dao.ExhibitionDao"/>
+    <fullyQualifiedTypeName name="java.io.Serializable"/>
+    <fullyQualifiedTypeName name="com.ex.tiggle.admin.model.dao.AdminDao"/>
+    <fullyQualifiedTypeName name="com.ex.tiggle.member.model.dao.OrganizerDao"/>
+    <fullyQualifiedTypeName name="com.ex.tiggle.organizer.model.dao.OrganizerDao"/>
+</qualifiedTypeNameHistroy>

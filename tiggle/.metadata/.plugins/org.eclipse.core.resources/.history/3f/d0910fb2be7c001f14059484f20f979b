@@ -1,0 +1,6 @@
+package com.ex.tiggle.main.service;
+
+@Service("mainService")
+public class MainServiceImpl implements MainService {
+	public 	MainDao mainDao;
+}

@@ -1,0 +1,9 @@
+package com.ex.tiggle.custboard.model.service;
+
+import org.springframework.stereotype.Service;
+
+@Service("custBoardService")
+public class CustBoardServiceImpl implements CustBoardService {
+	@Autowired
+	public CustBoardDao custboarddao;
+}

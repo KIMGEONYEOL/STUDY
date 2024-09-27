@@ -1,0 +1,5 @@
+package com.ex.tiggle.organizer.model.service;
+
+public class OrganizerServiceImpl {
+
+}

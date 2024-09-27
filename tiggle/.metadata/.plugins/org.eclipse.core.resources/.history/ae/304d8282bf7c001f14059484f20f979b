@@ -1,0 +1,7 @@
+package com.ex.tiggle.notice.model.service;
+
+@Service("noticeService")
+public class NoticeServiceImpl implements NoticeService {
+	@Autowired
+	private NoticeDao noticeDao;
+}

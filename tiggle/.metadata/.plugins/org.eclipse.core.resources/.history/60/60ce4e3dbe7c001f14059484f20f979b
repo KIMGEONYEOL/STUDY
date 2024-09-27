@@ -1,0 +1,6 @@
+package com.ex.tiggle.cancel.model.service;
+
+@Service("cancelService")
+public class CancelServiceImpl implements CancelService {
+	public CancelDao cancelDao;
+}

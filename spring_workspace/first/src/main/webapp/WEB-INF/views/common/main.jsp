@@ -82,8 +82,9 @@ $(function(){
 			values = '';
 			for(var i in json.nlist){
 				values += '<tr><td>' + json.nlist[i].no
-						+ '</td><td>' + decodeURIComponent(json.nlist[i].title).replace(/\+/gi, ' ')
-						+ '</td><td>' + json.nlist[i].date + '</td><tr>';
+						+ '</td><td><a href="ndetail.do?no=' + json.nlist[i].no + '">' 
+						+ decodeURIComponent(json.nlist[i].title).replace(/\+/gi, ' ')
+						+ '<a></td><td>' + json.nlist[i].date + '</td><tr>';
 			}
 			
 			$('#newnotice').html($('#newnotice').html() + values);
@@ -93,7 +94,39 @@ $(function(){
 			console.log('error : ' + jqXHR + ", " + textStatus + ", " + errorThrown);
 		}
 		
-	});
+	}); // ajax : ntop3.do
+
+	// 조회수 많은 인기 게시글 3개 (top-N) 전송받아서 출력 처리		
+	$.ajax({
+		url: 'btop3.do',
+		type: 'post',
+		dataType: 'json',
+		success: function(data){
+			console.log('success : ' + data); // [object Object]
+			
+			// object -> string
+			var str = JSON.stringify(data);
+			
+			// string -> json : parsing
+			var json = JSON.parse(str);
+			
+			values = '';
+			for(var i in json.blist){
+				values += '<tr><td>' + json.blist[i].bnum
+						+ '</td><td><a href="bdetail.do?bnum=' + json.blist[i].bnum + '">' 
+						+ decodeURIComponent(json.blist[i].btitle).replace(/\+/gi, ' ')
+						+ '</a></td><td>' + json.blist[i].rcount + '</td><tr>';
+			}
+			
+			$('#toplist').html($('#toplist').html() + values);
+			
+		},
+		error: function(jqXHR, textStatus, errorThrown){
+			console.log('error : ' + jqXHR + ", " + textStatus + ", " + errorThrown);
+		}
+		
+	});		
+		
 	
 }); // jQuery.document.ready(function(){});
 </script>
@@ -138,8 +171,10 @@ $(function(){
 				?전송이름=보낼값&전송이름=보낼값 : 쿼리스트링(queryString) 이라고 함
 				주의 : 쿼리스트링에는 공백 있으면 안됨.
 			 -->
-			<a href="myinfo.do?userId=<%-- <%= loginUser.getUserId() %> --%>
-									  "${ sessionScope.loginUser.userId}">내 정보 보기</a>
+			 
+		<%-- 	<a href="myinfo.do?userId=<%-- loginUser.getUserId() -- %>
+									  ${ sessionScope.loginUser.userId}">내 정보 보기</a> --%>
+			  <a href="myinfo.do?userId=${ sessionScope.loginUser.userId }">내 정보 보기</a>
 		</div>
 	</c:if>
 	<%-- <%} %> --%>

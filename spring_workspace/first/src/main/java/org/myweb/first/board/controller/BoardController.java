@@ -1,13 +1,75 @@
 package org.myweb.first.board.controller;
 
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.myweb.first.board.model.dto.Board;
 import org.myweb.first.board.model.service.BoardService;
+import org.myweb.first.notice.model.dto.Notice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class BoardController {
-
+	private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
+	
+	
 	@Autowired
 	private BoardService boardService;
+	
+	// 요청 처리용 메소드 ----------------------------------------------
+	
+	// ajax 요청 : 조회수 많은 인기 게시글 top-3 요청 처리용
+	@RequestMapping(value = "btop3.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String boardTop3Method(HttpServletResponse response) throws UnsupportedEncodingException {
+		// ajax 요청시 리턴방법은 여러가지가 있음 (문자열, json 객체 등)
+		// response 객체 이용시 2 가지 중 선택 가능
+		// 방법 1 : 출력스트림을 따로 생성해서 응답하는 방법 -> public void 로 지정
+		// 방법 2 : 뷰 리졸버로 리턴해서 등록된 JSONView 가 내보내는 방법 (servlet-context.xml 에 등록)
+		// public String 으로 지정
+
+		// 조회수 많은 게시글 3개 조회 요청함
+		ArrayList<Board> list = boardService.selectTop3();
+
+		// 내보낼 값에 대해 response 에 mimiType 설정
+		response.setContentType("application/json; charset=utf-8");
+
+		// 리턴된 list 를 json 배열에 옮겨 기록하기
+		JSONArray jarr = new JSONArray();
+
+		for (Board board : list) {
+			// notice 값들을 저장할 json 객체 생성
+			JSONObject job = new JSONObject(); // org.json.simple.JSONObject 임포트함
+
+			job.put("bnum", board.getBoardNum());
+			// 문자열 값에 한글이 포함되어 있다면, 반드시 인코딩해서 저장해야 함
+			// java.net.URLEncoder 의 static 메소드인 encode('문자열값', '문자셋')
+			job.put("btitle", URLEncoder.encode(board.getBoardTitle(), "utf-8"));
+		
+			// 조회수
+			job.put("rcount", board.getBoardReadCount());
+
+			jarr.add(job); // 배열에 추가
+		} // for each
+
+		// 전송용 json 객체 생성함
+		JSONObject sendJson = new JSONObject();
+		// 전송용 json 에 jarr 을 저장함
+		sendJson.put("blist", jarr);
+
+		return sendJson.toJSONString();
+	}
 	
 }

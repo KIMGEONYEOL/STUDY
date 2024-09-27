@@ -117,13 +117,13 @@ function validate(){
 	value="<%-- <%= member.getUserName() %> --%>${ requestScope.member.userName }" readonly></td></tr>
 	<tr><th>*성	별</th>
 		<td>
-		<c:if test="${ requsetScope.member.gender eq 'M' }">
+		<c:if test="${ requestScope.member.gender eq 'M' }">
 		<%-- <% if(member.getGender().equals("M")){ %> --%>
 			<input type="radio" name="gender" value="M" checked > 남자 &nbsp;
 			<input type="radio" name="gender" value="F" > 여자
 		</c:if>
 	<%-- 	<% } else if (member.getGender().equals("F")) {%> --%>
-		<c:if test="${ requsetScope.member.gender eq 'F' }">
+		<c:if test="${ requestScope.member.gender eq 'F' }">
 			<input type="radio" name="gender" value="M" > 남자 &nbsp;
 			<input type="radio" name="gender" value="F" checked> 여자		
 		<%-- <% }%> --%>

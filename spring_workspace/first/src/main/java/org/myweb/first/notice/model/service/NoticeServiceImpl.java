@@ -32,6 +32,24 @@ public class NoticeServiceImpl implements NoticeService {
 	public ArrayList<Notice> selectTop3() {
 		return noticeDao.selectTop3();
 	}
+
+	@Override
+	public Notice selectNotice(int noticeNo) {
+		return noticeDao.selectNotice(noticeNo);
+	}
+
+	@Override
+	public int updateAddReadCount(int noticeNo) {
+		return noticeDao.updateAddReadCount(noticeNo);
+	}
+
+	@Override
+	public ArrayList<Notice> selectList() {
+		return noticeDao.selectList();
+	}
 	
 }
-	
+
+
+
+

@@ -24,6 +24,10 @@ public class NoticeDao {
 		return (ArrayList<Notice>)list;
 	}
 	
+	// 상세보기 처리를 위한 공지글 1개 조회용
+	public Notice selectNotice(int noticeNo) {
+		return sqlSessionTemplate.selectOne("noticeMapper.selectNotice", noticeNo);
+	}
 	
 	// 공지 제목 검색
 	public ArrayList<Notice> selectSearchTitle(String keyword){
@@ -34,6 +38,16 @@ public class NoticeDao {
 	// 신규 공지 등록
 	public int insertNotice(Notice notice) {
 		return sqlSessionTemplate.insert("noticeMapper.insertNotice", notice);
+	}
+
+	// 조회수 1 증가 처리
+	public int updateAddReadCount(int noticeNo) {
+		return sqlSessionTemplate.update("noticeMapper.updateAddReadCount", noticeNo);
+	}
+
+	public ArrayList<Notice> selectList() {
+		List<Notice> list = sqlSessionTemplate.selectList("noticeMapper.selectList");
+		return (ArrayList<Notice>)list;
 	}
 	
 	

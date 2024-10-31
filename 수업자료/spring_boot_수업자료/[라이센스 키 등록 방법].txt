@@ -1,0 +1,6 @@
+[라이센스 키 등록 방법]
+1. IntelliJ Ultimate 다운 설치
+2. IntelliJ 실행 > 상단 메뉴 Help > Register... 클릭
+	> Activation code 선택
+	> 메일로 받은 txt 파일 안의 라이센스 키를 전체선택 > 복사 > 붙여넣기함
+	> 확인(ok) > 사용기한 표시됨

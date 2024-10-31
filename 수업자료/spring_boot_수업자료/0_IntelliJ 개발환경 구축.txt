@@ -1,0 +1,119 @@
+[IntelliJ 개발환경 구축]
+
+1. JDK(Java Development Kit) 설치 및 환경 설정하기 ---------------------------------------------------------------
+ (1) JDK 다운로드 및 설치
+	* 방법1 : Oracle 웹사이트(https://www.oracle.com/kr/java/technologies/downloads/)에서 jdk 다운로드 
+		(Linux, maxOS, Windows 운영체제 선택, 원하는 버전 선택(상단 Java archive 선택))
+		=> 오라클 계정이 필요함 (회원가입 > 로그인 > 다운로드 받음)
+	* 방법2 : openJDK 다운로드(https://jdk.java.net/archive/)  
+		(Linux, maxOS, Windows 운영체제 선택, 원하는 버전 선택)
+	
+	=> 다운로드한 파일을 실행하여 jdk를 설치하고 경로를 복사해 둡니다.
+ (2) 환경 변수 설정
+	: JAVA_HOME 및 PATH
+	=> 파일탐색기(윈도우로고+E) > 내PC 마우스 우클릭 > 속성 > 고급 시스템 설정 클릭
+	=> 환경변수 버튼 클릭 > 시스템변수 영역에서 '새로 만들기' 버튼 클릭
+	   변수명 : JAVA_HOME
+	   값 : JDK 설치경로 붙여넣기함 (예 : C:\Program Files\Java\jdk-11.0.2)
+	=> PATH 변수 찾아서 선택 > 편집 버튼 클릭 > 새로만들기 버튼 클릭
+	   %JAVA_HOME%\bin
+	   > 입력하고, 확인 버튼 클릭
+
+ *** JDK 에 대한 PATH 설정의 목적 : 
+	사용자가 명령 프롬프트(cmd)나 터미널에서 자바 실행과 관련된 java or javac 와 같은 명령어를 사용할 때 
+	운영체제(OS : windows, linux 등)가 자동으로 실행파일을 찾을 수 있게 하기 위함이다.
+
+ (3) Java 설치 확인
+	=> 명령 프롬프트 또는 터미널 실행
+	=> java -version 또는 javac -version 입력 엔터해서, 설치된 자바 버전이 출력되면 됨
+
+
+2. IntelliJ IDEA 설치 ---------------------------------------------------------------------------------------------------------------
+ (1) IntelliJ 개발툴 공식 웹사이트(https://www.jetbrains.com/idea/)에서 설치 파일을 다운받음
+	** 설치 파일은 Community Edition(무료 버전)과 Ultimate Edition(유료 버전)으로 제공됨
+
+ *** 무료와 유료의 차이 ***
+  * Community Edition : 
+	오픈 소스로 제공되며 Java, Kotlin, Groovy, Scala 등의 기본적인 프로그래밍 언어를 지원함
+	개인 및 오픈 소스 프로젝트에 적합하며 라이선스 비용없이 무료로 사용 가능함
+  * Ultimate Edition : 
+	전문 개발자를 위한 유료 버전으로 
+	Community Edition 의 기능 외에도 다양한 웹, 모바일, 엔터프라이즈 프레임워크를 지원함
+	Spring Boot, Java EE, Micronaut 등과 같은 프레임워크를 사용하거나 웹 개발을 위한 통합 툴이 필요하면 사용함
+	개인/기업에 따라 라이선스 비용이 다름. 
+	(비용확인 : https://www.jetbrains.com/idea/buy/?section=commercial&billing=yearly)
+
+ (2) 다운로드한 IntelliJ IDEA 설치
+	=> 체크사항은 모두 체크하고 설치함
+
+ (3) 기본 환경 설정
+	=> 설치가 완료되면, IntelliJ 실행함
+	=> File > Settings 또는 우측상단의 Settings 아이콘 클릭
+	=> 테마 변경, 글꼴 설정, 단축키 변경 등 설정함
+	    > Appearance & Behavior > New UI > Enable new UI 체크
+	    > Editor : File Encoding - UTF-8 설정 (둘 다)
+	    > Editor > General > Auto Import : 중간 위치의 Add Unambiguous...., 
+						Optimize imports .... 둘 다 체크함
+					    아래쪽 Kotlin 항목 아래 두가지도 체크함
+		** 코드를 작성할 때 필요한 라이브러리와 클래스를 자동으로 가져옴 **
+	    > Editor > General > Code Completion(코드완성) : Match case (대소문자 일치) 옵션 체크 해제함
+		** 코드 자동완성시 대소문자 구분할지 여부 결정 설정임 **
+	    > Build, Execution, Deployment > Compiler 
+	    > Annotation Processors : Enable annotation processing 체크함
+		** 자바 코드에 어노테이션 사용할 수 있도록 설정함 **
+
+
+or IntelliJ 사용이 안 된다면 ------------------------------------------------------
+2. sts(Spring Tool Suite 4) 설치
+ (1) https://spring.io/tools 사이트 접속
+ (2) Spring Tools 4 for Eclipse windows 버전 다운받음
+ (3) 다운받은 jar 파일을 반디집을 이용해 압축을 풀어줌
+ (4) 압축 푼 폴더 안으로 들어가면 contents.zip 파일이 있음
+ (5) 반디집으로 contents.zip 파일을 압축을 풀어줌
+ (6) 압축을 푼 contents 폴더 안으로 가면 sts-x.x.x.RELEASE 폴더가 있음
+ 	=> 이 폴더를 사용하기 좋은 위치로 옮김(복사)
+ (7) SpringToolSuite4.ini 파일을 열어 jdk 버전과 jvm 경로 확인 설정함
+ 	=>  Heap 메모리 사이즈도 필요하면 늘려준다.
+	-Xms2048m
+	-Xmx2048m
+ 	--vm
+	.....\javaw.exe
+	-Dosgi.requiredJavaVersion=17
+	=> 저장하고 닫음
+ (7) sts-x.x.x.RELEASE 폴더 안의 SpringToolSuite4.exe 를 더블클릭해서 실행하여 사용함
+ 	=> 워크스페이스 폴더 지정
+	=> 이클립스 update : 
+		Help 메뉴 > Install New Software 선택
+		> Work with 의 드롭다운 클릭 >Latest Eclipse Release - https://download.eclipse.org/release/latest 선택
+		> 오른쪽의 select all 버튼 클릭 > 아래의 Next 버튼 클릭 > 다운 설치 진행됨
+		> 설치가 끝나면 Next > I accept ... 체크함 > Next > finish 함
+		> Trust .... 팝업 창이 나타나면, select all 버튼 누르고, Trust 버튼 클릭함
+		> 반드시 sts eclipse restart 함
+
+	=> 인코딩 변경하기 : Window > Preferences > 
+		왼쪽 위 검색 필드에 encoding 입력 > Content Types 선택 > 오른쪽에서 Text 선택
+		> 아래쪽 Default encoding 에 UTF-8 입력함
+		General > Workspace
+		General > Editors > Text Editors > Spelling
+		web > HTML file, CSS file, JSP file 인코딩 수정함 > UTF-8 로 변경하고 APPLY 누름
+	=> STS 4에서 JavaScript 파일을 인식하게 하려면 설정이 필요함. 
+		Window > Preferences > General > Editors - File Associations
+		그리고 'File types'에 *.js를 추가하고, 
+		'Associated editors'에서 'Generic Text Editor'를 'Default'로 지정함
+	=> 사용중인 Heap 메모리 사용량 보기 설정하려면
+		Window 메뉴 > Preferences > General > Show heap status 체크
+	=> 그외 설정 변경
+		Window 메뉴 > Preferences 에서 
+		> 검색 필드에 "encoding" 입력
+		> Content Types 
+		> Java Class File과 Text 항목의 Default encoding 값을 UTF-8 로 변경 후 Update
+		> Workspace 의 Text file encoding 을 UTF-8 로 변경하고 
+		 New text file line delimeiter 는 Unix 로 변경
+		자동 줄바꿈 최대 가로 길이 변경. 기본 80에서 160으로
+		> General > Editors > Text Editors 
+		> Show print margin 의 Print margin column 값을 160으로 변경
+
+
+
+	
+

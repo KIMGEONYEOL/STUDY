@@ -1,0 +1,75 @@
+
+// *********************************************************************
+[ queryDSL 에서 날짜 데이터 다루기 ] 
+
+ [Expressions] ------------------------------------------------------------------------
+
+ Expressions는 Querydsl 타입 안전한 쿼리 API에서 사용되는 핵심 클래스 중 하나이다. 
+ Expressions 클래스는 다양한 데이터 타입에 대한 쿼리 표현식을 생성하는 메서드를 제공한다.
+
+ Expressions에서 제공하는 메서드는 다양한 데이터 타입에 대한 표현식을 생성할 수 있도록 구성되어 있다.
+
+  - numberExpression() : 숫자 데이터 타입에 대한 표현식을 생성
+  - stringExpression(): 문자열 데이터 타입에 대한 표현식을 생성
+  - booleanExpression(): 부울 데이터 타입에 대한 표현식을 생성
+  - comparableExpression(): Comparable 데이터 타입에 대한 표현식을 생성
+  - dateTimeExpression()❗ : 날짜 및 시간 데이터 타입에 대한 표현식을 생성
+  - entityPath(): 엔티티 데이터 타입에 대한 표현식을 생성
+ 
+
+ [날짜 및 시간 데이터 타입에 대한 표현식 사용 방법] -----------------------------------
+  
+ DTO 클래스에서 날짜를 반환 받을때 LocalDateTime, LocalDate, LocalTime 포맷으로 반환을 받고 있다.
+
+// Dto ------------------------------------------------------------------
+public class TestDto {
+    private Long rowNum;
+    private LocalDateTime testDateTime;
+    private LocalDate testDate;
+    private LocalTime testTime;
+}
+//------------------------------------------------------------------------
+
+// sample -------------------------------------------------------------
+public class TestSample {
+	queryFactory
+	.select(
+		Projections.fields(
+			Test.class,
+			QTestTable.testTable.sample_dateTime.as("testDateTime"),
+			QTestTable.testTable.sample_date.as("testDate"),
+			QTestTable.testTable.sample_time.as("testTime"),
+	)
+	.from(QTestTable.testTable)
+	.fetch();
+}
+//------------------------------------------------------------------------
+ => 위의 내용처럼 DTO 클래스를 조회한다고 할때, dateFormatException()이 발생하게 될것이다.
+ => java.sql.Timestamp 타입을 java.time.LocalDate 로 변환하지 못해서 생기는 이슈이다. 
+ => 이 부분을 해결하려면 조회할때 타입을 변환해서 받아야 한다.  
+ => 이때 사용한 것이 Expressions의 DateTimeTemplate 이다. 
+ => DateTimeTemplate은 날짜 및 시간 값을 처리하는 Expression을 생성하는 데 사용된다. 
+ => 날짜 및 시간 값은 다양한 형식으로 저장될 수 있으며, 
+    DateTimeTemplate 은 이러한 값들을 일관된 형식으로 처리할 수 있게 해준다.
+
+
+[ template 사용법 ] ----------------------------------------------------- 
+
+// 사용 방법 ---------------
+Expressions.dateTemplate("반환할 타입 Class", "template 포맷", "인자")
+
+// 사용 예시 ---------------
+Expressions.dateTemplate(LocalDate.class, "DATE_FORMAT({0}, '%Y-%m-%d')", targetDate)
+내용을 추가적으로 확인 해본 결과 Dialect (방언) 설정 이다.
+ 
+
+Spring boot를 실행하면서 연결되어 있는 데이터 베이스에 맞게 설정이 된다고 알고 있다. 
+(따로 설정을 건드릴 필요가 없다고...) 보통은 Hibernate 를 많이들 사용하고 있을것이다. 
+
+Hibernate는 특정 데이터베이스에 종속되지 않고 객체지향스럽게 사용할 수 있도록 추상화 해준다. 
+때문에 특정 DB에 종속된 함수는 제공하지 않는다. 
+
+특정 데이터베이스에서만 사용 가능한 함수를 호출할 때는 Dialect를 확장해서 사용해야한다. 
+
+방언 설정시 명시적으로 버전을 설정해서 사용하는 경우 정상동작이 되지 않을수 있다. 
+또한 위에 썻던 내용 처럼 DB에 종속된 함수는 제공하지 않는다...

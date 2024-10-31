@@ -1,0 +1,752 @@
+[JPA 구현 방법]
+
+첫번째, --------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+3. Service 클래스에서 해당 Repository 를 필드로 의존성주입 선언한 다음, 
+   각 메소드 안에서 JPA 가 제공하는 메소드를 사용하여 기능을 동작시킨다.
+4. 필요시 Repository 인터페이스에 필요한 메소드를 추가 선언해서 사용해도 됨
+	=> 필요한 sql 구문을 작성하여 구동하는 구문을 작성한다.
+	** JPQL 구문을 사용함
+
+두번째, ---------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+3. Repository 인터페이스를 상속받은 RepositoryImpl 클래스를 만든다.
+	=> 오버라이딩한 메소드 안에서 EntityManager 를 사용하여
+	필요한 sql 구문을 작성하여 구동하는 구문을 작성한다.
+	** JPQL 구문을 사용함
+4. Service 클래스에서 해당 Repository 를 필드로 선언한 다음, 
+   각 메소드 안에서 RepositoryImpl 클래스에서 작성한 메소드를 사용하여 
+   기능을 동작시킨다.
+
+세번째, ---------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+3. 별도의 dao 클래스를 만듦 => EntityManager 를 사용하여 메소드 기능 구현함
+  ** JPQL 구문 또는 QueryDSL 사용함
+4. Service 클래스에서 해당 DAO를 필드로 선언한 다음, 
+   각 메소드 안에서 DAO 클래스에서 작성한 메소드를 사용하여 
+   기능을 동작시킨다.
+
+
+[작업 순서] *************************************************
+1. jpa 에 대한 라이브러리 dependency 추가함
+//---------------------------------------------------------------------------------
+... 중간 생략 ...
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//jpa
+implementation 'org.hibernate:hibernate-entitymanager:5.3.10.Final'
+implementation 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+// 스프링 부트 3.0 이상 : Unable to load class 'javax.persistence.Entity'. 에러 발생할 경우
+//implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+//annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+
+// 스프링 부트 3.0 미만
+implementation 'com.querydsl:querydsl-jpa'
+annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+
+implementation 'com.querydsl:querydsl-core'
+implementation "com.querydsl:querydsl-collections"
+
+annotationProcessor "jakarta.annotation:jakarta.annotation-api" // java.lang.NoClassDefFoundError (javax.annotation.Generated) 에러 대응 코드
+annotationProcessor "jakarta.persistence:jakarta.persistence-api" // java.lang.NoClassDefFoundError (javax.annotation.Entity) 에러 대응 코드
+... 중간 생략 ...
+//--------------------------------------------------------------------------------
+
+
+2. application.properties 에 jpa 사용에 대한 설정 추가함 
+//---------------------------------------------------------------------------------
+.... 중간 생략 .....
+
+#dbms
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+spring.datasource.username=c##testweb
+spring.datasource.password=testweb
+
+#jpa
+spring.jpa.show-sql=true     
+# 실행 쿼리문 보이게 함
+#spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.hibernate.ddl-auto=none   
+ # 자동 ddl 구문 작동 안 되게 함
+spring.jpa.generate-ddl=true
+
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database=oracle
+spring.jpa.database-platform=org.hibernate.dialect.Oracle12cDialect
+spring.jpa.properties.hibernate.id.new_generator_mappings=false
+spring.jpa.defer-datasource-initialization=true
+
+# 로그 출력 레벨 지정
+logging.level.org.hibernate=info
+
+# 정상적이지 않은 클래스 객체는 직렬화 되지 않게 지정
+spring.jackson.serialization.fail-on-empty-beans=false
+spring.jackson.property-naming-strategy=SNAKE_CASE
+# 컬럼명 이름 표기법 지정 : 스프링은 기본 SNAKE_CASE 임, 
+# 소문자만 사용하고 단어 사이에 '_' 를 사용하는 표기법을 말함 (예 : user_name)
+# 사용 데이터베이스에 따라 대소문자 구분이 없는 경우에는 대소문자 모두 사용 가능함
+
+... 생략 ....
+//-----------------------------------------------------------------------------------------
+
+
+3. 패키지 구조는 임의대로 지정해도 됨
+   기존의 bootFirst_mybatis 프로젝트 구조를 최대한 그대로 두고 jpa 사용으로 변경한다면,
+
+   * 기존의 Board 테이블을 원글(Board)과 댓글(Reply) 테이블로 분리하였음 *
+   
+   * jpa 관련 패키지를 구성함 **********************************************
+
+   ~.board.jpa.entity.BoardEntity.java : board 테이블에 대한 가이드 클래스
+   	=> BoardDto 의 property 와 board 테이블의 column 을 매칭함
+	=> @Column(name="컬럼명", nullable="true | false", length=크기) 등을 지정함
+	=> 컬럼에 대한 @Id, primary key, not null 등 제약조건 설정함
+	=> @Entity 선언함, @Table("테이블명")
+	=> 롬복의 @Data, @AllArgsConstructor, @NoArgsConstructor, @Builder 선언함
+	=> entity 를 dto 로 변환하는 메소드 추가함 : public BoardDto toDto()
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+   ~.board.jpa.entity.ReplyEntity.java : reply 테이블에 대한 가이드 클래스
+	=> ReplyDto 의 property 와 board 테이블의 column 을 매칭함
+	=> @Column(name="컬럼명", nullable="true | false", length=크기) 등을 지정함
+	=> 컬럼에 대한 @Id, primary key, not null 등 제약조건 설정함
+	=> @Entity 선언함, @Table("테이블명")
+	=> 롬복의 @Data, @AllArgsConstructor, @NoArgsConstructor, @Builder 선언함
+	=> entity 를 dto 로 변환하는 메소드 추가함 : public ReplyDto toDto()
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+
+   ~.board.jpa.repository.BoardRepository.java : 
+	=> 인터페이스로 작성, JpaRepository 인터페이스를 상속받음
+	=> jpa가 제공하는 메소드가 아닌 기능에 대해 메소드 추가할 수 있음
+	   * 주의 : Entity 만 취급함 *
+	=> 추가한 메소드 시그니처 위에 쿼리문 작성함
+	  ex>
+	   @Query("SELECT c FROM Counseling c WHERE LOWER(c.counTitle) LIKE LOWER(CONCAT('%', :counTitle, '%'))")
+	   List<Counseling> findByTitle(@Param("counTitle") String counTitle);
+
+   ~.board.jpa.repository.ReplyRepository.java : 
+	=> 인터페이스로 작성, JpaRepository 인터페이스를 상속받음
+	=> jpa가 제공하는 메소드가 아닌 기능에 대해 메소드 추가할 수 있음
+	   * 주의 : Entity 만 취급함 *
+	=> 추가한 메소드 시그니처 위에 쿼리문 작성함
+	  ex>
+	   //패스워드 수정
+	    @Modifying
+	    @Query(value = "update Member set user_pw = :userPw where user_id = :userId", 
+			nativeQuery = true)
+	    void saveByPw(@Param("userPw") String userPw, @Param("userId") String userId);
+
+
+   ~.board.model.service.BoardService.java : 원글 처리용
+   	=> @Service, @Transactional 선언함
+	=> BoardRepository 의존성 주입함
+	=> repository 제공 메소드 사용 구문으로 변경함
+	   dto 를 entity 로 변환해서 repository 메소드에 적용함
+	   필요시 리턴타입도 변경함
+
+   ~.board.model.service.ReplyService.java : 댓글/대댓글 처리용
+   	=> @Service, @Transactional 선언함
+	=> ReplyRepository 의존성 주입함
+	=> repository 제공 메소드 사용 구문으로 변경함
+	   dto 를 entity 로 변환해서 repository 메소드에 적용함
+	   필요시 리턴타입도 변경함
+
+
+   ** dto(Data Transfer Object, vo | domain 과 같은 의미의 용어임) **
+   	=> 컨트롤러와 서비스에서 사용함
+
+   ~.board.model.dto.BoardDto.java : 원글 property 저장용
+   ~.board.model.dto.ReplyDto.java : 댓글/대댓글 property 저장용
+   	=> @Data 
+	   @NoArgsConstructor
+	   @AllArgsConstructor
+	   @Validated
+	   @Builder
+	   @Component
+	=> entity 를 dto 로 변환하는 메소드 추가함
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+
+   ~.board.controller.BoardController.java 순으로 작업함
+
+
+[JPA 페이징 처리] -----------------------------------------------------------
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+사용함
+
+* [설명] * ***********************
+Pageable 인터페이스 구현체를 JpaRepository 메소드에 파라미터로 넘겨주면 자동으로 페이징 처리가 됨. 
+개발자가 Pageable 인터페이스를 직접 조작하는 일은 별로 없음. 
+
+* Pageable 인터페이스가 제공하는 메소드 요약 *******************
+JPA 가 페이징 처리를 위해 필요한 기능들을 명세하고 있음.
+
+ + getPageNumber 메소드 - 현재 페이지 번호를 반환
+ + getPageSize 메소드 - 한 페이지에서 보여줄 항목들의 개수를 반환
+ + getOffset 메소드 - 페이지 크기에 따라 취할 오프셋을 반환
+ + next 메소드 - 다음 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+ + first 메소드 - 첫번째 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+ + previousOrFirst 메소드 - 이전 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+		가장 첫 페이지인 경우에는 첫 페이지를 위한 Pageable 인터페이스를 반환
+
+
+1. Pageable 인터페이스 구조 *************************
+public interface Pageable {
+
+    // ... 
+
+    int getPageNumber();
+    int getPageSize();
+    long getOffset();
+    Pageable next();
+    Pageable previousOrFirst();
+    Pageable first();
+}
+
+
+2. PageRequest 클래스 ******************************
+페이징 처리를 할 수 있도록 Pageable 인터페이스를 구현한 객체를 JpaRepository에게 전달해야 함. 
+Spring 프레임워크에서는 Pageable 인터페이스 구현체를 쉽게 생성할 수 있도록 
+PageRequest 클래스를 제공함.
+
+ (1) PageRequest 클래스 of 메소드
+
+  of 메소드에 들어간 파라미터를 예로 들면,
+  Sort.by(Direction.DESC, “testValue”) -> testValue 필드 값으로 내림차순 정렬한 항목(row)들을
+  100 - 100개씩 하나의 페이지로 출력하고
+  0 - 0번째 페이지에 대해
+  예>
+  Pageable pageable = PageRequest.of(0, 100, Sort.by(Direction.DESC, "testValue"));
+
+
+3. Page 클래스 ******************************************
+페이징 처리가 되어 반환되는 결과는 Page<T> 클래스에 담겨 반환됨. 
+Page<T> 클래스는 다음과 같은 정보를 지님.
+
+ + getPageable 메소드 - 페이징 처리에서 사용한 Pageable 인터페이스 구현체 정보
+ + getContent 메소드 - 해당 페이지에 해당되는 항목(row) 리스트
+ + getTotalElements 메소드 - 조회 조건에 일치하는 총 항목 수
+ + getTotalPages 메소드 - 총 페이지 개수
+
+ => PageRequest 클래스 of 메소드를 통해 얻은 Pageable 구현체는 아래 코드처럼 사용할 수 있음. 
+    JapRepository에서 기본적으로 제공하는 findAll 메소드를 이용하였을 때,
+
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.DESC, "testValue"));
+    Page<TestEntity> testEntities = testRepository.findAll(pageable);
+
+
+4. 페이징 처리를 위한 JPA 쿼리문 작성방법 *********************************
+
+JPA 페이징 처리 방법을 세 가지 방법으로 구현한다면,
+
+ (1) JpaRepository 메소드 이름 규칙을 활용한 findBy 메소드 추가해서 사용하는 방법
+ (2) @Query 애너테이션 with JPQL 구문 사용하는 방법
+ (3) @Query 애너테이션 with Native Query 구문 사용하는 방법
+
+4.1. TestEntity 클래스 작성 예 : 
+// ----------------------------------------------------------------------
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "TB_TABLE")
+class TestEntity {
+	
+    public TestEntity(String value) {
+        this.testValue = value;
+    }
+
+    @Id
+    @GeneratedValue
+    private long id;
+
+    @Column(name = "TEST_VALUE")
+    private String testValue;
+
+    @Column(name = "CREATED_AT", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist  //jpa 로 넘어가지 전에 작동
+    public void prePersist() {
+        createdAt = LocalDateTime.now(); //createdAt 에 현재 시간 적용
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + id + ", testValue: " + testValue + ", createdAt: " + createdAt;
+    }
+}
+// -----------------------------------------------------------------------
+
+
+4.2. 첫번째 방법 : findBy 메소드 추가하여 페이징 처리 sql 문 작동 
+
+ - testValue 필드 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0, 1번 페이지를 조회한다.
+ - testValue 필드 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않는다. (case not sensitive)
+
+// 호출구문 -----------------------------------------------------------------------
+      
+Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Direction.DESC, "testValue"));
+Page<TestEntity> testEntities = testRepository.findByTestValueStartsWith("A", pageable);
+
+log.info("전체 페이지 수: " + testEntities.getTotalPages());
+log.info("현재 페이지 번호: " + testEntities.getPageable().getPageNumber());
+log.info("페이지 별 사이즈: " + testEntities.getPageable().getPageSize());
+log.info("조건 일치 총 항목 수: " + testEntities.getTotalElements());
+            
+// repository ------------------------------------------------------------------
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+
+    // ...
+
+    Page<TestEntity> findByTestValueStartsWith(String testValue, Pageable pageable);
+}
+// ---------------------------------------------------------------------------
+
+
+4.3. 두번째 방법 : @Query + JPQL 사용 sql 작동 코드 
+
+ - testValue 필드 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0, 1번 페이지를 조회한다.
+ - testValue 필드 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않는다. (case not sensitive)
+
+// -------------------------------------------------------------------------
+
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+    
+    // ...
+
+    //구분 : from 절에 엔티티 사용
+    @Query(value = "SELECT t FROM TestEntity t WHERE t.testValue LIKE :testValue%", 
+    countQuery = "SELECT COUNT(t) FROM TestEntity t WHERE t.testValue LIKE :testValue%")
+    Page<TestEntity> findByValueStartsWithUsingJpql(@Param("testValue") String testValue, Pageable pageable);
+}
+// -------------------------------------------------------------------------------
+
+
+4.4. @Query + Native Query 사용 sql 작동 코드
+
+ - TEST_VALUE 컬럼 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0번째, 1번 페이지를 조회한다.
+ - TEST_VALUE 컬럼 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않습니다. (case not sensitive)
+ ** 주의 : Native Query를 사용하기 때문에 Sort.by 메소드에 “testValue” 값을 전달하면 에러가 발생함.
+         조회 시 사용된 쿼리 로그를 보면 order by t.TEST_VALUE desc limit ? 조건이 추가되었음.
+         페이징 처리를 위한 count 쿼리가 추가 수행되었음.
+ 
+// 호출 코드 -----------------------------------------------------------------
+
+    Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Direction.DESC, "TEST_VALUE"));
+    Page<TestEntity> testEntities = testRepository.findByValueStartsWithUsingNative("A", pageable);
+
+    log.info("전체 페이지 수: " + testEntities.getTotalPages());
+    log.info("현재 페이지 번호: " + testEntities.getPageable().getPageNumber());
+    log.info("페이지 별 사이즈: " + testEntities.getPageable().getPageSize());
+    log.info("조건 일치 총 항목 수: " + testEntities.getTotalElements());
+           
+
+// ---------------------------------------------------------------------------
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+
+    // ...
+
+    //구분 : from 절에 테이블명 사용	
+    @Query(value = "SELECT * FROM TB_TABLE t WHERE TEST_VALUE LIKE :testValue%", 
+    countQuery = "SELECT COUNT(*) FROM TB_TABLE t WHERE t.TEST_VALUE LIKE :testValue%", nativeQuery = true)
+    Page<TestEntity> findByValueStartsWithUsingNative(@Param("testValue") String testValue, Pageable pageable);
+}
+// ---------------------------------------------------------------------------
+
+
+// ****************************************************************
+[QueryDSL 사용]
+
+QueryDSL 은 한마디로 SQL, JPQL 등을 코드로 작성할 수 있도록 해주는 빌더 오픈소스 프레임워크이다.
+QueryDSL 은 JPA 뿐만 아니라 SQL, Mongodb, Lucenece 등 다양한 언어에 대해서 서비스를 제공한다.
+ => 공식 사이트 참조 : http://querydsl.com/
+
+QueryDSL JPA 는
+ ① SQL, JPQL 을 코드로 작성할 수 있도록 해주는 빌더 API 이고,
+ ② Entity 클래스와 매핑되는 QClass 라는 객체를 사용해서 쿼리를 실행한다.
+
+QClass 란 ?
+ QueryDSL 은 컴파일 단계에서 엔티티를 기반으로 QClass 를 생성하는데 
+ JPAAnnotationProcessor 가 컴파일 시점에 작동해서 @Entity 등등의 어노테이션을 찾아 
+ 해당 파일들을 분석해서 QClass 를 만든다.
+ QClass 는 Entity 와 형태가 똑같은 Static Class 이다.
+ QueryDSL 은 쿼리를 작성할 때 QClass 를 기반으로 쿼리를 실행한다.
+
+JPQL 이란 ?
+ JPA 에서 지원하는 다양한 쿼리 방법 중 가장 단순한 조회 방법으로, 
+ SQL 의 경우에는 DB 테이블을 대상으로 쿼리를 질의하지만, 
+ JPQL 은 엔티티 객체를 대상으로 쿼리를 질의한다.
+
+ EX)
+
+  String jpql = “select m From MemberEntity m where m.userName like ‘%hello%’”;
+  List<Member> result = em.createQuery(jpql, Member.class).getResultList();
+  (SQL 로 변환시) select * from members where user_name like ‘%hello%’;
+
+
+JPQL 에는 문제점이 존재한다.
+
+JPQL 의 문제점 --------------------------------------
+ ① 쿼리를 여전히 문자열로 입력한다.
+    -> 오타가 발생하거나 관리하는데 있어서 어려움이 따르고, type-check 가 불가능하다
+
+ ② 컴파일 단계에서 오류를 확인할 수 없고, 런타임에서 해당 쿼리가 실행되어야 오류를 발견할 수 있다.
+    -> 테스트 코드를 짜면 불안을 덜 수 있긴 하지만, 
+      실제 프로그램을 운영하면서 오류가 발생할 수도 있다는 부담이 너무 커진다.
+
+ QueryDSL JPA 는 JPQL 이 가지고 있는 문제점들을 해결해준다.
+
+QueryDSL JPA 를 사용해야 하는 이유 ---------------------------
+ ① 쿼리를 여전히 문자열로 입력하기 때문에 오타가 발생하거나 관리하기 어렵다.
+    -> QueryDSL 은 쿼리를 문자열로서가 아니라 코드를 통해서 작성하기 때문에 오타가 날 확률이 적어지고, 
+      객체 지향적으로 개발할 수 있다.
+
+ ② 컴파일 단계에서 오류를 확인할 수 없고, 런타임 시 해당 쿼리가 실행되어야지만 오류를 확인할 수 있다.
+    -> QueryDSL 은 코드로서 작성하기 때문에 컴파일 단계에서도 오류를 빠르게 발견할 수 있다.
+
+    예를 들어서
+    회원(member) 와 포인트(point) 를 조인해서 가져와야 할 때
+    JPQL 의 경우에는
+
+    String jpql = "select * from Member m join Point p on p.member_id = m.id"
+    List<Member> result = em.createQuery(jpql, Member.class).getResultList();
+    이런식으로 쿼리를 작성해야 하지만,
+    QueryDSL 을 사용했을 때에는
+
+    return jpaQueryFactory
+          .from(member)
+          .join(member.point, point)
+          .fetch();
+
+    이런 식으로 코드를 사용해서 나타낼 수 있다.
+    오타가 나더라도 컴파일 단계에서 오류를 확인 할 수 있고, 
+    코드로서 작성하기 때문에 더욱 객체 지향적으로 개발할 수 있다.
+
+이러한 이유로 spring 에서 JPA 를 사용할 때 QueryDSL JPA 를 보통 함께 사용한다.
+// ***********************************************************
+
+
+[1]. build.gradle 에 QueryDSL 세팅하기 ******************************
+
+먼저 build.gradle 에 QueryDSL 관련 코드를 세팅해줘야 한다.
+
+// build.gradle ------------------------------------------------------------------------
+dependencies {
+	... 
+	// 스프링 부트 3.0 이상 : Unable to load class 'javax.persistence.Entity'. 에러 발생할 경우
+	//implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	//annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+
+	// 스프링 부트 3.0 미만
+	implementation 'com.querydsl:querydsl-jpa'
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+
+	implementation 'com.querydsl:querydsl-core'
+	implementation "com.querydsl:querydsl-collections"
+
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api" // java.lang.NoClassDefFoundError (javax.annotation.Generated) 에러 대응 코드
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api" // java.lang.NoClassDefFoundError (javax.annotation.Entity) 에러 대응 코드
+}
+
+def querydslSrcDir = 'src/main/generated'
+sourceSets {
+  main {
+    java {
+      srcDirs += [ querydslSrcDir ]
+    }
+  }
+}
+
+compileJava {
+    options.compilerArgs << '-Aquerydsl.generatedAnnotationClass=javax.annotation.Generated'
+}
+
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(querydslSrcDir)
+}
+
+clean {
+  delete file(querydslSrcDir)
+}
+//-------------------------------------------------------------------------------------------------
+
+[dependencies 설명]
+
+ * implementation 'com.querydsl:querydsl-jpa'
+   → QueryDSL 을 사용하기 위한 라이브러리
+   → QuerydslRepositorySupport, QuerydslPredicateExecutor 등 
+      QueryDSL 내부 클래스는 사용 가능하지만, 실제로 쿼리를 위해 사용되는 QClass 는 생성되지 않는다.
+
+ * implementation 'com.querydsl:querydsl-apt'
+   → QClass 를 생성하기 위한 라이브러리
+
+ * annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+   → QueryDSL JPA 의 경우에는 QClass 를 활용해서 동작하는데 
+      @Entity 어노테이션을 선언한 클래스를 탐색하고, QClass 를 생성한다.
+
+ * QClass 를 생성하는 방법에는 크게 두가지로 나뉜다.
+
+   ① com.ewerk.gradle.plugins.querydsl 사용
+    -> 2018년 이후 업데이트 된 적이 없다.
+    -> gradle 버전이 계속적으로 업데이트되면서 해당 플러그인 외 여러가지 설정해줘야 할 것들이 많다.
+
+   ② annotationProcessor 사용    
+
+     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+
+    -> 이클립스 재단으로 자바가 이관되면서 java → jakarta 로 이름이 변경되었다.
+    -> Q 파일을 찾지 못해서 발생하는 오류인 java.lang.NoClassDefFoundError 
+      (javax.annotation.Entity / javax.annotation.Generated) 에러 발생 대응을 위한 코드이다.
+
+//sourceSets ---------------------------------------------------------------------
+def querydslSrcDir = 'src/main/generated'
+sourceSets {
+  main {
+    java {
+      srcDirs += [ querydslSrcDir ]
+    }
+  }
+}
+//-----------------------------------------------------------------------------------
+ -> gradle build 시 QClass 소스도 함께 build 하기 위해서 sourceSets 에 해당 위치를 추가해준다.
+
+
+//compileJava -----------------------------------------------------------------------
+compileJava {
+    options.compilerArgs << '-Aquerydsl.generatedAnnotationClass=javax.annotation.Generated'
+}
+//-----------------------------------------------------------------------------------
+ -> 해당 내용을 명시해주지 않으면 Q 파일 내 Generated 를 import 할 때 
+   자바 9 에만 있는 import javax.annotation.processing.Generated 로 import 해준다.
+ -> 그렇기 때문에 다른 버전에서도 사용할 수 있도록 java.annotation.Generated 로 import 하도록 
+   설정하는 코드이다.
+
+
+//tasks.withType -------------------------------------------------------------------
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(querydslSrcDir)
+}
+//------------------------------------------------------------------------------------
+ -> annotationProcessorGeneratedSourcesDirectory 를 사용할 수도 있는데,
+   Gradle 공식 문서에 해당 기능은 deprecated 되었고, 
+   추후 major version 에선 삭제할 것이라고 소개하고 있기 때문에 
+   generatedSourceOutputDirectory 를 사용한다.
+ -> generatedSourceOutputDirectory 는 
+   annotation processors 에서 생성한 소스 파일을 저장할 디렉토리를 지정해 준다. 
+   (Gradle 공식문서 → CompileOptions - Gradle DSL Version 7.5.1 )
+ -> 이 코드를 통해 위에서 선언한 querydslSrcDir 변수의 src/main/generated 에 
+   annotation processors 가 만든 QClass 들을 저장해 준다.
+
+
+//clean -----------------------------------------------------------------------------
+clean {
+	// clean 실행 시 생성된 QClass 삭제
+	delete file(querydslSrcDir)
+}
+//-------------------------------------------------------------------------------------
+ -> build clean 시에 생성되었던 QClass 를 모두 삭제 (querydslSrcDir = src/main/generated)
+
+
+[실행하기] ----------------------------------------------------------------------------
+만들어진 QClass 삭제하기 : Gradle > build > clean
+QClass 만들기 : Gradle > build > compileJava
+***
+src > main > generated 내에 Q 클래스가 만들어졌으면 queryDSL 설정이 정상적으로 된 것이다.
+***
+
+
+[2]. QueryDSL 사용하기 ************************************************
+
+① QuerydslConfig 파일 설정하기 ------------------------------------------
+//-----------------------------------------------------------------------
+@Configuration
+public class QuerydslConfig {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Bean
+    public JPAQueryFactory jpaQueryFactory() {
+	return new JPAQueryFactory(entityManager);
+    }
+}
+//-----------------------------------------------------------------------
+
+[코드 설명] 
+
+ * @PersistenceContext
+   EntityManager 를 빈으로 주입할 때 사용하는 어노테이션
+   빈으로 주입받을 때 EntityManager 의 경우 @Autowired 가 아니라 해당 어노테이션으로 주입
+   JPAQueryFactory 를 Bean 으로 등록해서 프로젝트 전역에서 사용할 수 있도록 한다
+
+② QueryDSL 사용 Repository 구조 잡기
+Spring 에서 QueryDSL 을 사용하는 방법에는
+총 3가지 방법 (Spring Data Jpa Custom Repository / QueryRepositorySupport / JPAQueryFactory) 이 있다.
+
+1. Spring Data JPA Custom Repository 사용
+
+Spring 에서 QueryDSL 과 JPARepository 를 함께 사용하려면 각 역할 별 파일을 두 개 만들어주거나, 하나의 파일이 두 개의 의존성을 가져야 한다. 이러한 경우 Spring Data JPA 에서 제공하는 ✨Spring Data Custom Repository✨ 를 사용하면 된다.
+
+공식 Docs → Spring Data JPA - Reference Documentation
+
+해당 방식을 통해서 CustomRepository 를 JpaRepository 상속 클래스에서 함께 상속 받아서 사용할 수 있다.
+
+구현된 Repository 구조는 아래와 같다.
+
+
+Repository(interface) 가 JpaRepository(interface), CustomRepository(interface)를 다중 상속 받고,
+→ CustomRepository 인터페이스에 선언되어 있는 메소드에 대한 구현은 RepositoryImpl 에서 한다.
+→ 그리고 사용자는 Repository 인터페이스를 DI 받아서 사용한다.
+
+🤔 근데, RepositoryImpl은 Repository를 직접적으로 구현하지 않는데 어떻게 Repository에서 사용가능할까 ?
+:💡 사용자 정의 구현 클래스인 경우 JPA 가 파일명이 repository interface 이름 + Impl 인 클래스를 찾아서 interface 에 JpaRepository를 Injection 할 때에 Impl 객체를 삽입해주기 때문에 사용할 수 있다.
+→ 그렇기 때문에 반드시 구현체 파일명이 interface 명 + impl 이여야 한다.
+
+이 방식의 경우 총 3개의 repository 관련 파일이 만들어진다.
+
+첫번째, Repository 파일 (interface)
+JpaRepository 와 Custom interface 를 상속한 파일
+사용자는 해당 파일을 DI 받아서 사용한다
+
+public interface ContentRepository extends JpaRepository<Content, Long>, ContentRepositoryCustom {
+}
+두번째, RepositoryCustom 파일 (interface)
+QueryDSL 로 커스텀해서 사용할 메소드 선언하는 파일
+
+public interface ContentRepositoryCustom {
+}
+세번째, RepositoryImpl 파일 (class)
+RepositoryCustom interface 에 선언한 메소드 구현하는 파일
+
+@RequiredArgsConstructor
+public class ContentRepositoryImpl implements ContentRepositoryCustom {
+  private final JPAQueryFactory queryFactory;
+}
+EX)
+
+public interface ContentRepositoryCustom {
+}
+
+@RequiredArgsConstructor
+public class ContentRepositoryImpl implements ContentRepositoryCustom {
+  private final JPAQueryFactory queryFactory;
+}
+
+public class ContentRepository extends JpaRepository<Content, Long>, ContentRepositoryCustom {
+
+}
+단점
+QueryDSL 을 사용하는 경우 만들어야 하는 파일이 엄청 많아지고, 그에 따른 관리 포인트가 늘어난다.
+
+2. QueryRepositorySupport 상속하기
+
+첫번째 방식처럼 여러 파일을 만들어서 상속받는 방식이 아니라 QuerydslRepositorySupport 만 상속하여 구조를 단순화 하는 방식
+
+@Repository 
+public class ContentRepositorySupport extends QuerydslRepositorySupport {
+  private final JPAQueryFactory queryFactory;
+  
+  public ContentRepositorySupport(JPAQueryFactory queryFactory) {
+    super(Content.class);
+    this.queryFactory = queryFactory;
+  }
+}
+단점
+→ 매번 Support 를 상속 받고, super 생성자에 Entity 를 등록해줘야 한다.
+→ Entity 를 save, delete 하는 repository 와 query 하는 repository 가 나뉘어 진다.
+
+3. JPAQueryFactory 사용하기
+
+JPAQueryFactory 만 있으면 QueryDSL 기능을 모두 사용할 수 있다.
+
+2번째 방식 처럼 super & 생성자를 사용하지 않아도 된다. 사용하고자 하는 Q 클래스를 import 해서 사용하는 방식
+
+@RequiredArgsConstructor
+@Repository
+public class ContentQueryRepository {
+  private final JPAQueryFactory queryFactory;
+  
+  public List<Content> findByTitle(String title) {
+    return queryFactory
+              .selectFrom(content)
+              .where(content.title.eq(title))
+              .fetch();
+  }
+}
+단점
+
+Entity 를 save, delete 하는 repository 와 query 하는 Repository 가 나뉘어 진다.
+
+내가 사용하는 QueryDSL 사용 방식
+내가 QueryDSL 을 사용할 때에는 첫번째 방식으로 가장 많이 사용한다.
+
+두번째 (QueryRepositorySuppor), 세번째 (JPAQueryFactory) 방식의 경우에는 Spring JPA 기능과 QueryDSL 을 사용하기 위해서 각각 파일을 만들어서 사용하기 때문에 둘 간의 연관관계도 없고, 파일만 봤을 때 애매할 수 있다.
+
+두번째, 세번째 방식의 경우 사용 예시 👇
+
+public interface ContentJpaRepository extends JpaRepository<Content, Long> {
+}
+
+@RequiredArgsConstructor
+public class ContentQueryRepository {
+  private final JPAQueryFactory jpaQueryFactory;
+}
+
+@RequiredArgsConstructor
+public class Test {
+  private final ContentJpaRepository contentJpaRepository;
+  private final ContentQueryRepository contentQueryRepository;
+  
+  public void test() {
+    contentJpaRepository.save();
+    contentQueryRepository.customMethod();
+  }
+}
+첫번째 방식으로 한다고 하면 아래와 같이 사용할 수 있다.
+
+ContentRepositoryCustom.java
+
+public interface ContentRepositoryCustom {
+    Content findByUserSeq(Long userSeq);
+}
+ContentRepositoryImpl.java
+
+import static show.grip.admin.content.model.QContent.content;
+
+@Repository
+@RequiredArgsConstructor
+public class ContentRepositoryImpl implements ContentRepositoryCustom {
+    private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Content findByUserSeq(Long userSeq) {
+        return queryFactory
+                .selectFrom(content)
+                .where(content.userSeq.eq(userSeq))
+                .fetchFirst();
+    }
+}
+ContentRepository.java
+
+public interface ContentRepository extends JpaRepository<Content, Long>, ContentRepositoryCustom {
+}
+코드에서는 다음과 같이 사용하기
+
+contentRepository.findByUserSeq(userSeq);
+물론 내가 사용하는 방식이 무조건적으로 옳다는 건 아니라 각각의 방식에는 장단점이 존재한다.
+각 방식에 대해서 장단점 및 사용방식을 파악하고, 프로젝트에 맞는 방식을 사용하자 ~

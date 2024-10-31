@@ -1,0 +1,381 @@
+[JPA 구현 방법 - JPQL 사용]
+
+첫번째, --------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+3. Service 클래스에서 해당 Repository 를 필드로 의존성주입 선언한 다음, 
+   각 메소드 안에서 JPA 가 제공하는 메소드를 사용하여 기능을 동작시킨다.
+4. 필요시 Repository 인터페이스에 필요한 메소드를 추가 선언해서 사용한다.
+	=> 필요한 sql 구문을 작성하여 구동하는 구문을 작성한다.
+	** JPQL 구문을 사용함
+
+	@Query("sql 구문")
+	반환형 메서드명(자료형 매개변수);
+
+	@Query("sql 구문", nativeQuery=true)
+	반환형 메서드명(@Param("전달인자이름") 자료형 매개변수);
+
+두번째, ---------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+3. 별도의 CustomRepository 인터페이스를 만듦 => 사용할 추상메소드 선언함
+   => 상속받은 Impl 클래스를 만듦 => 추상메서드 구현함
+   => EntityManager 또는 JpaQueryFactory 를 사용하여 메소드 기능 구현함
+  ** JPQL 구문 또는 QueryDSL 사용함
+4. Service 클래스에서 해당 Repository 를 필드로 선언한 다음, 
+   각 메소드 안에서 Impl 클래스에서 작성한 메소드를 사용하여 
+   기능을 동작시킨다.
+
+세번째, ---------------------------------------------------------------------------
+1. 해당 테이블에 대한 Entity 클래스를 만든다.
+2. JpaRepository 를 상속받은 Repository 인터페이스를 만든다.
+	=> jpa 가 제공하는 메소드만 사용하기 위해 이용함
+3. 아무것도 상속받지 않는 QueryRepository 클래스를 만든다.
+	=> 필요한 메소드를 직접 추가 작성한다.
+	=> 메소드 안에서 EntityManager 또는 JPAQueryFactory 를 사용하여
+	필요한 sql 구문을 작성하여 구동하는 구문을 작성한다.
+	** EntityManager : JPQL 구문을 사용함
+	** JPAQueryFactory : queryDSL 문 사용함
+4. Service 클래스에서 해당 Repository 와 QueryRepository 를 필드로 선언한 다음, 
+   각 메소드 안에서 추가 작성한 메소드를 사용하여 기능을 동작시킨다.
+
+
+[작업 순서] *************************************************
+1. jpa 에 대한 라이브러리 dependency 추가함
+//---------------------------------------------------------------------------------
+... 중간 생략 ...
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//jpa
+implementation 'org.hibernate:hibernate-entitymanager:5.3.10.Final'
+implementation 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+// 스프링 부트 3.0 이상 : Unable to load class 'javax.persistence.Entity'. 에러 발생할 경우
+//implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+//annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+
+// 스프링 부트 3.0 미만
+implementation 'com.querydsl:querydsl-jpa'
+annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+
+implementation 'com.querydsl:querydsl-core'
+implementation "com.querydsl:querydsl-collections"
+
+annotationProcessor "jakarta.annotation:jakarta.annotation-api" // java.lang.NoClassDefFoundError (javax.annotation.Generated) 에러 대응 코드
+annotationProcessor "jakarta.persistence:jakarta.persistence-api" // java.lang.NoClassDefFoundError (javax.annotation.Entity) 에러 대응 코드
+... 중간 생략 ...
+//--------------------------------------------------------------------------------
+
+
+2. application.properties 에 jpa 사용에 대한 설정 추가함 
+//---------------------------------------------------------------------------------
+.... 중간 생략 .....
+
+#dbms
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+spring.datasource.username=c##testweb
+spring.datasource.password=testweb
+
+#jpa
+spring.jpa.show-sql=true     
+# 실행 쿼리문 보이게 함
+#spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.hibernate.ddl-auto=none   
+ # 자동 ddl 구문 작동 안 되게 함
+spring.jpa.generate-ddl=true
+
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database=oracle
+spring.jpa.database-platform=org.hibernate.dialect.Oracle12cDialect
+spring.jpa.properties.hibernate.id.new_generator_mappings=false
+spring.jpa.defer-datasource-initialization=true
+
+# 로그 출력 레벨 지정
+logging.level.org.hibernate=info
+
+# 정상적이지 않은 클래스 객체는 직렬화 되지 않게 지정
+spring.jackson.serialization.fail-on-empty-beans=false
+spring.jackson.property-naming-strategy=SNAKE_CASE
+# 컬럼명 이름 표기법 지정 : 스프링은 기본 SNAKE_CASE 임, 
+# 소문자만 사용하고 단어 사이에 '_' 를 사용하는 표기법을 말함 (예 : user_name)
+# 사용 데이터베이스에 따라 대소문자 구분이 없는 경우에는 대소문자 모두 사용 가능함
+
+... 생략 ....
+//-----------------------------------------------------------------------------------------
+
+
+3. 패키지 구조는 임의대로 지정해도 됨
+   기존의 bootFirst_mybatis 프로젝트 구조를 최대한 그대로 두고 jpa 사용으로 변경한다면,
+
+   * 기존의 Board 테이블을 원글(Board)과 댓글(Reply) 테이블로 분리하였음 *
+   
+   * jpa 관련 패키지를 구성함 **********************************************
+
+   ~.board.jpa.entity.BoardEntity.java : board 테이블에 대한 가이드 클래스
+   	=> BoardDto 의 property 와 board 테이블의 column 을 매칭함
+	=> @Column(name="컬럼명", nullable="true | false", length=크기) 등을 지정함
+	=> 컬럼에 대한 @Id, primary key, not null 등 제약조건 설정함
+	=> @Entity 선언함, @Table("테이블명")
+	=> 롬복의 @Data, @AllArgsConstructor, @NoArgsConstructor, @Builder 선언함
+	=> entity 를 dto 로 변환하는 메소드 추가함 : public BoardDto toDto()
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+   ~.board.jpa.entity.ReplyEntity.java : reply 테이블에 대한 가이드 클래스
+	=> ReplyDto 의 property 와 board 테이블의 column 을 매칭함
+	=> @Column(name="컬럼명", nullable="true | false", length=크기) 등을 지정함
+	=> 컬럼에 대한 @Id, primary key, not null 등 제약조건 설정함
+	=> @Entity 선언함, @Table("테이블명")
+	=> 롬복의 @Data, @AllArgsConstructor, @NoArgsConstructor, @Builder 선언함
+	=> entity 를 dto 로 변환하는 메소드 추가함 : public ReplyDto toDto()
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+
+   ~.board.jpa.repository.BoardRepository.java : 
+	=> 인터페이스로 작성, JpaRepository 인터페이스를 상속받음
+	=> jpa가 제공하는 메소드가 아닌 기능에 대해 메소드 추가할 수 있음
+	   * 주의 : Entity 만 취급함 *
+	=> 추가한 메소드 시그니처 위에 쿼리문 작성함
+	  ex>
+	   @Query("SELECT c FROM Counseling c WHERE LOWER(c.counTitle) LIKE LOWER(CONCAT('%', :counTitle, '%'))")
+	   List<Counseling> findByTitle(@Param("counTitle") String counTitle);
+
+   ~.board.jpa.repository.ReplyRepository.java : 
+	=> 인터페이스로 작성, JpaRepository 인터페이스를 상속받음
+	=> jpa가 제공하는 메소드가 아닌 기능에 대해 메소드 추가할 수 있음
+	   * 주의 : Entity 만 취급함 *
+	=> 추가한 메소드 시그니처 위에 쿼리문 작성함
+	  ex>
+	   //패스워드 수정
+	    @Modifying
+	    @Query(value = "update Member set user_pw = :userPw where user_id = :userId", 
+			nativeQuery = true)
+	    void saveByPw(@Param("userPw") String userPw, @Param("userId") String userId);
+
+
+   ~.board.model.service.BoardService.java : 원글 처리용
+   	=> @Service, @Transactional 선언함
+	=> BoardRepository 의존성 주입함
+	=> repository 제공 메소드 사용 구문으로 변경함
+	   dto 를 entity 로 변환해서 repository 메소드에 적용함
+	   필요시 리턴타입도 변경함
+
+   ~.board.model.service.ReplyService.java : 댓글/대댓글 처리용
+   	=> @Service, @Transactional 선언함
+	=> ReplyRepository 의존성 주입함
+	=> repository 제공 메소드 사용 구문으로 변경함
+	   dto 를 entity 로 변환해서 repository 메소드에 적용함
+	   필요시 리턴타입도 변경함
+
+
+   ** dto(Data Transfer Object, vo | domain 과 같은 의미의 용어임) **
+   	=> 컨트롤러와 서비스에서 사용함
+
+   ~.board.model.dto.BoardDto.java : 원글 property 저장용
+   ~.board.model.dto.ReplyDto.java : 댓글/대댓글 property 저장용
+   	=> @Data 
+	   @NoArgsConstructor
+	   @AllArgsConstructor
+	   @Validated
+	   @Builder
+	   @Component
+	=> entity 를 dto 로 변환하는 메소드 추가함
+	=> 날짜 자료형을 LocalDateTime 으로 변경함
+
+
+   ~.board.controller.BoardController.java 순으로 작업함
+
+
+[JPA 페이징 처리] -----------------------------------------------------------
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+사용함
+
+* [설명] * ***********************
+Pageable 인터페이스 구현체를 JpaRepository 메소드에 파라미터로 넘겨주면 자동으로 페이징 처리가 됨. 
+개발자가 Pageable 인터페이스를 직접 조작하는 일은 별로 없음. 
+
+* Pageable 인터페이스가 제공하는 메소드 요약 *******************
+JPA 가 페이징 처리를 위해 필요한 기능들을 명세하고 있음.
+
+ + getPageNumber 메소드 - 현재 페이지 번호를 반환
+ + getPageSize 메소드 - 한 페이지에서 보여줄 항목들의 개수를 반환
+ + getOffset 메소드 - 페이지 크기에 따라 취할 오프셋을 반환
+ + next 메소드 - 다음 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+ + first 메소드 - 첫번째 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+ + previousOrFirst 메소드 - 이전 페이지를 조회할 때 사용하는 Pageable 인터페이스를 반환
+		가장 첫 페이지인 경우에는 첫 페이지를 위한 Pageable 인터페이스를 반환
+
+
+1. Pageable 인터페이스 구조 *************************
+public interface Pageable {
+
+    // ... 
+
+    int getPageNumber();
+    int getPageSize();
+    long getOffset();
+    Pageable next();
+    Pageable previousOrFirst();
+    Pageable first();
+}
+
+
+2. PageRequest 클래스 ******************************
+페이징 처리를 할 수 있도록 Pageable 인터페이스를 구현한 객체를 JpaRepository에게 전달해야 함. 
+Spring 프레임워크에서는 Pageable 인터페이스 구현체를 쉽게 생성할 수 있도록 
+PageRequest 클래스를 제공함.
+
+ (1) PageRequest 클래스 of 메소드
+
+  of 메소드에 들어간 파라미터를 예로 들면,
+  Sort.by(Direction.DESC, “testValue”) -> testValue 필드 값으로 내림차순 정렬한 항목(row)들을
+  100 - 100개씩 하나의 페이지로 출력하고
+  0 - 0번째 페이지에 대해
+  예>
+  Pageable pageable = PageRequest.of(0, 100, Sort.by(Direction.DESC, "testValue"));
+
+
+3. Page 클래스 ******************************************
+페이징 처리가 되어 반환되는 결과는 Page<T> 클래스에 담겨 반환됨. 
+Page<T> 클래스는 다음과 같은 정보를 지님.
+
+ + getPageable 메소드 - 페이징 처리에서 사용한 Pageable 인터페이스 구현체 정보
+ + getContent 메소드 - 해당 페이지에 해당되는 항목(row) 리스트
+ + getTotalElements 메소드 - 조회 조건에 일치하는 총 항목 수
+ + getTotalPages 메소드 - 총 페이지 개수
+
+ => PageRequest 클래스 of 메소드를 통해 얻은 Pageable 구현체는 아래 코드처럼 사용할 수 있음. 
+    JapRepository에서 기본적으로 제공하는 findAll 메소드를 이용하였을 때,
+
+    Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.DESC, "testValue"));
+    Page<TestEntity> testEntities = testRepository.findAll(pageable);
+
+
+4. 페이징 처리를 위한 JPA 쿼리문 작성방법 *********************************
+
+JPA 페이징 처리 방법을 세 가지 방법으로 구현한다면,
+
+ (1) JpaRepository 메소드 이름 규칙을 활용한 findBy 메소드 추가해서 사용하는 방법
+ (2) @Query 애너테이션 with JPQL 구문 사용하는 방법
+ (3) @Query 애너테이션 with Native Query 구문 사용하는 방법
+
+4.1. TestEntity 클래스 작성 예 : 
+// ----------------------------------------------------------------------
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "TB_TABLE")
+class TestEntity {
+	
+    public TestEntity(String value) {
+        this.testValue = value;
+    }
+
+    @Id
+    @GeneratedValue
+    private long id;
+
+    @Column(name = "TEST_VALUE")
+    private String testValue;
+
+    @Column(name = "CREATED_AT", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist  //jpa 로 넘어가지 전에 작동
+    public void prePersist() {
+        createdAt = LocalDateTime.now(); //createdAt 에 현재 시간 적용
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + id + ", testValue: " + testValue + ", createdAt: " + createdAt;
+    }
+}
+// -----------------------------------------------------------------------
+
+
+4.2. 첫번째 방법 : findBy 메소드 추가하여 페이징 처리 sql 문 작동 
+
+ - testValue 필드 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0, 1번 페이지를 조회한다.
+ - testValue 필드 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않는다. (case not sensitive)
+
+// 호출구문 -----------------------------------------------------------------------
+      
+Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Direction.DESC, "testValue"));
+Page<TestEntity> testEntities = testRepository.findByTestValueStartsWith("A", pageable);
+
+log.info("전체 페이지 수: " + testEntities.getTotalPages());
+log.info("현재 페이지 번호: " + testEntities.getPageable().getPageNumber());
+log.info("페이지 별 사이즈: " + testEntities.getPageable().getPageSize());
+log.info("조건 일치 총 항목 수: " + testEntities.getTotalElements());
+            
+// repository ------------------------------------------------------------------
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+
+    // ...
+
+    Page<TestEntity> findByTestValueStartsWith(String testValue, Pageable pageable);
+}
+// ---------------------------------------------------------------------------
+
+
+4.3. 두번째 방법 : @Query + JPQL 사용 sql 작동 코드 
+
+ - testValue 필드 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0, 1번 페이지를 조회한다.
+ - testValue 필드 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않는다. (case not sensitive)
+
+// -------------------------------------------------------------------------
+
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+    
+    // ...
+
+    //구분 : from 절에 엔티티 사용
+    @Query(value = "SELECT t FROM TestEntity t WHERE t.testValue LIKE :testValue%", 
+    countQuery = "SELECT COUNT(t) FROM TestEntity t WHERE t.testValue LIKE :testValue%")
+    Page<TestEntity> findByValueStartsWithUsingJpql(@Param("testValue") String testValue, Pageable pageable);
+}
+// -------------------------------------------------------------------------------
+
+
+4.4. @Query + Native Query 사용 sql 작동 코드
+
+ - TEST_VALUE 컬럼 값을 내림차순(desc)으로 정렬한다.
+ - 페이지 당 항목 수를 10개씩 0번째, 1번 페이지를 조회한다.
+ - TEST_VALUE 컬럼 값이 ‘A’로 시작되는 데이터를 조회한다.
+ - 문자열의 대소문자를 구분하지 않습니다. (case not sensitive)
+ ** 주의 : Native Query를 사용하기 때문에 Sort.by 메소드에 “testValue” 값을 전달하면 에러가 발생함.
+         조회 시 사용된 쿼리 로그를 보면 order by t.TEST_VALUE desc limit ? 조건이 추가되었음.
+         페이징 처리를 위한 count 쿼리가 추가 수행되었음.
+ 
+// 호출 코드 -----------------------------------------------------------------
+
+    Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by(Direction.DESC, "TEST_VALUE"));
+    Page<TestEntity> testEntities = testRepository.findByValueStartsWithUsingNative("A", pageable);
+
+    log.info("전체 페이지 수: " + testEntities.getTotalPages());
+    log.info("현재 페이지 번호: " + testEntities.getPageable().getPageNumber());
+    log.info("페이지 별 사이즈: " + testEntities.getPageable().getPageSize());
+    log.info("조건 일치 총 항목 수: " + testEntities.getTotalElements());
+           
+
+// ---------------------------------------------------------------------------
+interface TestRepository extends JpaRepository<TestEntity, Long> {
+
+    // ...
+
+    //구분 : from 절에 테이블명 사용	
+    @Query(value = "SELECT * FROM TB_TABLE t WHERE TEST_VALUE LIKE :testValue%", 
+    countQuery = "SELECT COUNT(*) FROM TB_TABLE t WHERE t.TEST_VALUE LIKE :testValue%", nativeQuery = true)
+    Page<TestEntity> findByValueStartsWithUsingNative(@Param("testValue") String testValue, Pageable pageable);
+}
+// ---------------------------------------------------------------------------
+
+

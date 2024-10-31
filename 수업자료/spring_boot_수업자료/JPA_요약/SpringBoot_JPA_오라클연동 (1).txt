@@ -1,0 +1,132 @@
+[스프링 부트와 JPA 사용 오라클 연동]
+
+* JPA :
+- JPA는 기존의 반복 코드는 물론이고, 기본적인 SQL도 JPA가 직접 만들어서 실행해준다.
+- JPA를 사용하면, SQL과 데이터 중심의 설계에서 객체 중심의 설계로 패러다임을 전환할 수 있다.
+- JPA를 사용하면 개발 생산성을 크게 높일 수 있다.
+
+* JPA(Java Persistence API) :
+- JPA는 자바 영역에서 ORM(Object-Relational Mapping) 기술 표준으로 사용되는 인터페이스의 모음이다.
+- 즉, 실제적으로 구현된 것이 아니라 구현된 클래스와 매핑을 해주기 위해 사용되는 프레임워크이다.
+
+  > JPA 라이브러리 추가하기
+	=> 왼쪽 build.gradle 클릭	
+	dependencies 부분에 라이브러리 코드 추가하기
+  - JPA 라이브러리는 jdbc 라이브러리를 포함하고 있다.
+# ------------------------------------------------------------------------------------------------
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+implementation group: 'com.oracle.database.jdbc', name: 'ojdbc8', version: '18.x.x.x'
+# ------------------------------------------------------------------------------------------------
+
+** 주의 : 오라클 연동이 안될시에는
+# ------------------------------------------------------------------------------------------------
+runtimeOnly 'com.oracle.database.jdbc:ojdbc8' 로 변경함
+# ------------------------------------------------------------------------------------------------
+
+  > build.gradle -> 우클릭 -> Gradle -> Refresh Gradle Project
+	하여 라이브러리 불러오기
+	=> 오른쪽 하단에 진행상황 확인
+
+* JPA 설정하기
+  > 왼쪽 application.properties 에 코드 추가하기
+# ------------------------------------------------------------------------------------------------
+#port
+server.port=8888
+
+#encoding
+server.servlet.encoding.charset=UTF-8
+server.servlet.encoding.forcet=true
+server.servlet.encoding.enabled=true
+
+#dbms
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+spring.datasource.username=c##student
+spring.datasource.password=student
+
+#jpa
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=none
+# ------------------------------------------------------------------------------------------------
+
+* @Repository / @Transactional
+  레파지토리 생성 후 @Repository 어노테이션 추가
+# ------------------------------------------------------------------------------------------------
+	@Repository
+	public class JpaMemberRepository implements MemberRepository {}
+# ------------------------------------------------------------------------------------------------
+
+  > Service 클래스에 @Transactional 어노테이션추가
+# ------------------------------------------------------------------------------------------------
+	import org.springframework.transaction.annotation.Transactional;
+
+	@Service
+	@Transactional
+# ------------------------------------------------------------------------------------------------
+
+
+* @Entity
+DB클래스와 1:1 대응하는 DTO클래스 -> JPA가 관리하는 클래스라는 의미로
+-> @Entity 어노테이션 추가하기
+# ------------------------------------------------------------------------------------------------
+import javax.persistence.Entity;
+
+@Entity
+public class Member {}
+# ------------------------------------------------------------------------------------------------
+
+* @Id
+PK값인 변수에 @Id 어노테이션 추가하기
+-> id변수가 PK값임을 JPA에 알려주는 것이다.
+# ------------------------------------------------------------------------------------------------
+	@Id
+	private int id;
+# ------------------------------------------------------------------------------------------------
+
+[PK값 시퀀스로 증가시키기 - @GeneratedValue]
+@GeneratedValue : 시퀀스 전략 사용한다는 의미
+	@GeneratedValue 어노테이션에 아무 전략도 세우지 않고, 
+	어노테이션만 사용한다면, 각각 DBMS에 맞는 전략방법으로 
+	대상 PK 컬럼 값을 자동 증가 컬럼으로 만들어준다.
+# ------------------------------------------------------------------------------------------------
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "mySequence", sequenceName = "member_seq", 
+		allocationSize = 1)
+	private int id;
+	private String name;
+# ------------------------------------------------------------------------------------------------
+
+* NEXTVAL -> 시퀀스 하나씩 증가시키기
+
+generator : 시퀀스 전략의 이름
+name : 위의 generator와 매핑
+sequenceName : DB시퀀스 네임
+allocationSize : 증가시킬 숫자
+
+  > Repository에 EntityManager 주입받기
+	JPA는 EntityManager로 뭐든지 동작 한다.
+# ------------------------------------------------------------------------------------------------
+	private final EntityManager em;
+	
+	public JpaMemberRepository(EntityManager em) {
+		this.em = em;
+	}
+
+	@Override
+	public Member save(Member member) {
+		em.persist(member);
+		return member;
+	}
+
+	@Override
+	public List<Member> findAll() {
+		return em.createQuery("select m from Member m", Member.class).getResultList();		
+		
+	}
+# ------------------------------------------------------------------------------------------------
+select m from Member m : JPQL 이라는 쿼리
+
+* JPQL(Java Persisstence Query Language)
+테이블이 아닌 엔티티 객체를 대상으로 검색하는 객체지향 쿼리
+SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않음
+JPA는 JPQL을 분석 후 적절한 SQL을 만들어 데이터베이스를 조회함

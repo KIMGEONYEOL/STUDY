@@ -1,0 +1,51 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+.pricing-container {
+    display: flex;
+    gap: 20px; /* 각 content div 사이의 간격 */
+    max-width: 1200px;
+}
+
+.content {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 300px;
+}
+
+.content h3 {
+    font-size: 24px;
+    color: #333;
+}
+
+.content p {
+    font-size: 16px;
+    color: #666;
+    margin: 10px 0;
+}
+
+.content button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.content button:hover {
+    background-color: #0056b3;
+}

@@ -1,0 +1,89 @@
+/* 기본 설정 */
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #333;
+}
+
+nav ul li {
+    position: relative;
+}
+
+nav ul li a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+}
+
+nav ul li:hover > a {
+    background-color: #555;
+}
+
+/* 드롭다운 메뉴 스타일 */
+nav ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #444;
+    padding: 0;
+}
+
+nav ul li:hover > ul {
+    display: block;
+}
+
+nav ul ul li a {
+    padding: 10px;
+    width: 150px;
+    color: #ddd;
+}
+
+nav ul ul li a:hover {
+    background-color: #666;
+}
+/* 전체 섹션 설정 */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 2em 0;
+    text-align: center;
+}
+
+footer h2 {
+    color: #ddd;
+}
+
+/* 폼 설정 */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+textarea {
+    height: 150px;
+}
+
+.form-button-submit {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #555;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.form-button-submit:hover {
+    background-color: #777;
+}
